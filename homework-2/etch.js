@@ -13,8 +13,8 @@ var drawButton = 'P9_15';
 var clearButton = 'P9_16';
 
 // Global variables
-var ROW_SIZE = 9;
-var COL_SIZE = 21;
+var ROW_SIZE = 21;
+var COL_SIZE = 43;
 var draw = false;
 var refersh = true;
 var grid = new Array(ROW_SIZE);
@@ -97,6 +97,7 @@ function processButton (button) {
 	}
 
 	if (button === 'left') {
+		console.log('left');
 		if (currentCol <= 0) {
 			currentCol = 0;
 		} else{
@@ -105,6 +106,7 @@ function processButton (button) {
 
 		refersh = true;
 	} else if (button === 'right') {
+		console.log('right');
 		if (currentCol >= COL_SIZE - 1) {
 			currentCol = COL_SIZE - 1;
 		} else{
@@ -113,12 +115,16 @@ function processButton (button) {
 
 		refersh = true;
 	} else if (button === 'up') {
+		console.log('up');
 		if (currentRow <= 0) {
 			currentRow = 0;
 		} else{
 			currentRow--;
 		}
+
+		refersh = true;
 	} else if (button === 'down') {
+		console.log('down');
 		if (currentRow >= ROW_SIZE - 1) {
 			currentRow = ROW_SIZE - 1;
 		} else{
