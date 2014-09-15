@@ -16,39 +16,16 @@ var clearButton = 'P9_16';
 var ROW_SIZE = 9;
 var COL_SIZE = 21;
 var draw = false;
+var refersh = true;
 var grid = new Array(ROW_SIZE);
 var currentRow = (ROW_SIZE - 1) / 2,
 	currentCol = (COL_SIZE - 1) / 2;
 
-start();
+init();
+clearScreen();
+initInterrupts();
+setInterval(drawScreen, 10);
 
-function start (argument) {
-	async.waterfall([
-		function (callback) {
-			var err = function (message) {
-				callback(message);
-			};
-			callback(null, err);
-		}, function (throwErr, callback) {
-			init();
-			callback(null, throwErr, callback);
-		}, function (throwErr, callback) {
-			clearScreen();
-			callback(null, throwErr, callback);
-		}, function (throwErr, callback) {
-			initInterrupts();
-			callback(null, throwErr, callback);
-		}, function (throwErr, callback) {
-			//setInterval(drawScreen, 1000);
-			callback(null);
-		}],
-		function (err) {
-			if (err) {
-				console.log("Error occurred:" + err);
-			}
-		}
-	);
-}
 
 function init () {
 	for (var i = 0; i < ROW_SIZE; i++) {
@@ -75,52 +52,43 @@ function initInterrupts () {
 }
 
 function clearScreen () {
-	shell.exec('clear');
-
-	for (var i = 0; i < COL_SIZE; i++) {
-		process.stdout.write('_');
-	};
-
-	process.stdout.write('\n');
-
 	for (var i = 0; i < ROW_SIZE; i++) {
-		process.stdout.write('|');
 		for (var j = 0; j < COL_SIZE; j++) {
 			grid[i][j] = ' ';
-			process.stdout.write(' ');
 		};
-		process.stdout.write('|\n');
 	};
 
-	for (var i = 0; i < COL_SIZE; i++) {
-		process.stdout.write('_');
-	};
+	refersh = true;
 }
 
 function drawScreen () {
-	shell.exec('clear');
+	if (refersh) {
+		shell.exec('clear');
 
-	for (var i = 0; i < COL_SIZE; i++) {
-		process.stdout.write('_');
-	};
-
-	process.stdout.write('\n');
-
-	for (var i = 0; i < ROW_SIZE; i++) {
-		process.stdout.write('|');
-		for (var j = 0; j < COL_SIZE; j++) {
-			if (i === currentRow && j === currentCol) {
-				process.stdout.write('+');
-			} else {
-				process.stdout.write(grid[i][j]);
-			}
+		for (var i = 0; i < COL_SIZE; i++) {
+			process.stdout.write('_');
 		};
-		process.stdout.write('|\n');
-	};
 
-	for (var i = 0; i < COL_SIZE; i++) {
-		process.stdout.write('_');
-	};
+		process.stdout.write('\n');
+
+		for (var i = 0; i < ROW_SIZE; i++) {
+			process.stdout.write('|');
+			for (var j = 0; j < COL_SIZE; j++) {
+				if (i === currentRow && j === currentCol) {
+					process.stdout.write('+');
+				} else {
+					process.stdout.write(grid[i][j]);
+				}
+			};
+			process.stdout.write('|\n');
+		};
+
+		for (var i = 0; i < COL_SIZE; i++) {
+			process.stdout.write('_');
+		};
+
+		refersh = false;
+	}
 }
 
 function processButton (button) {
@@ -134,12 +102,16 @@ function processButton (button) {
 		} else{
 			currentCol--;
 		}
+
+		refersh = true;
 	} else if (button === 'right') {
 		if (currentCol >= COL_SIZE - 1) {
 			currentCol = COL_SIZE - 1;
 		} else{
 			currentCol++;
 		}
+
+		refersh = true;
 	} else if (button === 'up') {
 		if (currentRow <= 0) {
 			currentRow = 0;
@@ -152,6 +124,8 @@ function processButton (button) {
 		} else{
 			currentRow++;
 		}
+
+		refersh = true;
 	} else if (button === 'clear') {
 		clearScreen();
 	} else if (button === 'draw') {
