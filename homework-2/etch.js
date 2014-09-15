@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 var bone = require('bonescript'),
-	spawn = require('child_process').spawn,
+	shell = require('shelljs'),
+	async = require('async');
 	process = require('process');
 
 // Inputs and outputs
@@ -15,29 +16,66 @@ var clearButton = 'P9_16';
 var ROW_SIZE = 9;
 var COL_SIZE = 21;
 var draw = false;
-var grid[ROW_SIZE][COL_SIZE];
+var grid = new Array(ROW_SIZE);
 var currentRow = (ROW_SIZE - 1) / 2,
 	currentCol = (COL_SIZE - 1) / 2;
 
-// Set up pins
-bone.pinMode(leftButton, bone.INPUT, 7, 'pulldown');
-bone.pinMode(rightButton, bone.INPUT, 7, 'pulldown');
-bone.pinMode(upButton, bone.INPUT, 7, 'pulldown');
-bone.pinMode(downButton, bone.INPUT, 7, 'pulldown');
-bone.pinMode(drawButton, bone.INPUT, 7, 'pulldown');
-bone.pinMode(clearButton, bone.INPUT, 7, 'pulldown');
+start();
 
-// Set up asynchronous function calls
-setInterval(drawScreen, 300);
-bone.attachInterrupt(leftButton, true, bone.RISING, function (x) {processButton('left');});
-bone.attachInterrupt(rightButton, true, bone.RISING, function (x) {processButton('right');});
-bone.attachInterrupt(upButton, true, bone.RISING, function (x) {processButton('up');});
-bone.attachInterrupt(downButton, true, bone.RISING, function (x) {processButton('down');});
-bone.attachInterrupt(clearButton, true, bone.RISING, function (x) {processButton('clear');});
-bone.attachInterrupt(drawButton, true, bone.RISING, function (x) {processButton('draw');});
+function start (argument) {
+	async.waterfall([
+		function (callback) {
+			var err = function (message) {
+				callback(message);
+			};
+			callback(null, err);
+		}, function (throwErr, callback) {
+			init();
+			callback(null, throwErr, callback);
+		}, function (throwErr, callback) {
+			clearScreen();
+			callback(null, throwErr, callback);
+		}, function (throwErr, callback) {
+			initInterrupts();
+			callback(null, throwErr, callback);
+		}, function (throwErr, callback) {
+			//setInterval(drawScreen, 1000);
+			callback(null);
+		}],
+		function (err) {
+			if (err) {
+				console.log("Error occurred:" + err);
+			}
+		}
+	);
+}
+
+function init () {
+	for (var i = 0; i < ROW_SIZE; i++) {
+		grid[i] = new Array(COL_SIZE);
+	};
+}
+
+function initInterrupts () {
+	// Set up pins
+	bone.pinMode(leftButton, bone.INPUT, 7, 'pulldown');
+	bone.pinMode(rightButton, bone.INPUT, 7, 'pulldown');
+	bone.pinMode(upButton, bone.INPUT, 7, 'pulldown');
+	bone.pinMode(downButton, bone.INPUT, 7, 'pulldown');
+	bone.pinMode(drawButton, bone.INPUT, 7, 'pulldown');
+	bone.pinMode(clearButton, bone.INPUT, 7, 'pulldown');
+
+	// Set up asynchronous function calls
+	bone.attachInterrupt(leftButton, true, bone.FALLING, function (x) {processButton('left');});
+	bone.attachInterrupt(rightButton, true, bone.FALLING, function (x) {processButton('right');});
+	bone.attachInterrupt(upButton, true, bone.FALLING, function (x) {processButton('up');});
+	bone.attachInterrupt(downButton, true, bone.FALLING, function (x) {processButton('down');});
+	bone.attachInterrupt(clearButton, true, bone.FALLING, function (x) {processButton('clear');});
+	bone.attachInterrupt(drawButton, true, bone.FALLING, function (x) {processButton('draw');});
+}
 
 function clearScreen () {
-	spawn('clear');
+	shell.exec('clear');
 
 	for (var i = 0; i < COL_SIZE; i++) {
 		process.stdout.write('_');
@@ -60,7 +98,7 @@ function clearScreen () {
 }
 
 function drawScreen () {
-	spawn('clear');
+	shell.exec('clear');
 
 	for (var i = 0; i < COL_SIZE; i++) {
 		process.stdout.write('_');
