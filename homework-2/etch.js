@@ -63,7 +63,7 @@ function clearScreen () {
 
 function drawScreen () {
 	if (refersh) {
-		shell.exec('clear');
+		clear();
 
 		for (var i = 0; i < COL_SIZE; i++) {
 			process.stdout.write('_');
@@ -137,4 +137,9 @@ function processButton (button) {
 	} else if (button === 'draw') {
 		draw = !draw;
 	}
+}
+
+// A handy clear screen function that works on Linux
+function clear () {
+	console.log('\033[2J');
 }
