@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-var bone = require('octalbonescript'),
+var bone = require('bonescript'),
 	shell = require('shelljs'),
 	async = require('async');
 	process = require('process');
@@ -50,12 +50,6 @@ function initInterrupts () {
 	bone.pinMode(downButton, bone.INPUT, 7, 'pulldown');
 	bone.pinMode(drawButton, bone.INPUT, 7, 'pulldown');
 	bone.pinMode(clearButton, bone.INPUT, 7, 'pulldown');
-	// bone.pinMode(leftButton, bone.INPUT_PULLDOWN);
-	// bone.pinMode(rightButton, bone.INPUT_PULLDOWN);
-	// bone.pinMode(upButton, bone.INPUT_PULLDOWN);
-	// bone.pinMode(downButton, bone.INPUT_PULLDOWN);
-	// bone.pinMode(drawButton, bone.INPUT_PULLDOWN);
-	// bone.pinMode(clearButton, bone.INPUT_PULLDOWN);
 	bone.pinMode(leftLED, bone.OUTPUT);
 	bone.pinMode(rightLED, bone.OUTPUT);
 	bone.pinMode(upLED, bone.OUTPUT);
