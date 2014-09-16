@@ -1,16 +1,21 @@
 #!/usr/bin/env node
-var bone = require('bonescript'),
+var bone = require('octalbonescript'),
 	shell = require('shelljs'),
 	async = require('async');
 	process = require('process');
 
 // Inputs and outputs
-var leftButton = 'P9_11';
-var rightButton = 'P9_12';
-var upButton = 'P9_13';
-var downButton = 'P9_14';
-var drawButton = 'P9_15';
-var clearButton = 'P9_16';
+var leftButton = 'P9_11',
+	rightButton = 'P9_12',
+	upButton = 'P9_13',
+	downButton = 'P9_14',
+	drawButton = 'P9_15',
+	clearButton = 'P9_16',
+	leftLED = 'P9_21',
+	rightLED = 'P9_22',
+	upLED = 'P9_23',
+	downLED = 'P9_41',
+	drawLED = 'P9_42';
 
 // Global variables
 var ROW_SIZE = 21;
@@ -45,6 +50,17 @@ function initInterrupts () {
 	bone.pinMode(downButton, bone.INPUT, 7, 'pulldown');
 	bone.pinMode(drawButton, bone.INPUT, 7, 'pulldown');
 	bone.pinMode(clearButton, bone.INPUT, 7, 'pulldown');
+	// bone.pinMode(leftButton, bone.INPUT_PULLDOWN);
+	// bone.pinMode(rightButton, bone.INPUT_PULLDOWN);
+	// bone.pinMode(upButton, bone.INPUT_PULLDOWN);
+	// bone.pinMode(downButton, bone.INPUT_PULLDOWN);
+	// bone.pinMode(drawButton, bone.INPUT_PULLDOWN);
+	// bone.pinMode(clearButton, bone.INPUT_PULLDOWN);
+	bone.pinMode(leftLED, bone.OUTPUT);
+	bone.pinMode(rightLED, bone.OUTPUT);
+	bone.pinMode(upLED, bone.OUTPUT);
+	bone.pinMode(downLED, bone.OUTPUT);
+	bone.pinMode(drawLED, bone.OUTPUT);
 
 	// Set up asynchronous function calls
 	bone.attachInterrupt(leftButton, true, bone.FALLING, function (x) {processButton('left');});
@@ -81,11 +97,7 @@ function setupScreen () {
 	for (var i = 0; i < ROW_SIZE; i++) {
 		process.stdout.write('|');
 		for (var j = 0; j < COL_SIZE; j++) {
-			if (i === currentRow && j === currentCol) {
-				process.stdout.write('+');
-			} else {
-				process.stdout.write(grid[i][j]);
-			}
+			process.stdout.write(grid[i][j]);
 			prevGrid[i][j] = grid[i][j];
 		};
 		process.stdout.write('|\n');
@@ -99,12 +111,17 @@ function setupScreen () {
 }
 
 function drawScreen () {
+	if (draw) {
+		bone.digitalWrite(drawLED, bone.HIGH);
+	} else {
+		bone.digitalWrite(drawLED, bone.LOW);
+	}
+
 	if (refersh) {
 		for (var i = 0; i < ROW_SIZE; i++) {
 			for (var j = 0; j < COL_SIZE; j++) {
 				if (i === currentRow && j === currentCol) {
 					setCursor(i, j);
-					grid[i][j] = '+';
 					process.stdout.write('+');
 				} else if (grid[i][j] !== prevGrid[i][j]) {
 					setCursor(i, j)
@@ -125,6 +142,8 @@ function processButton (button) {
 
 	if (draw) {
 		grid[currentRow][currentCol] = 'x';
+	} else {
+		prevGrid[currentRow][currentCol] = 'c';
 	}
 
 	if (button === 'left') {
@@ -168,10 +187,10 @@ function processButton (button) {
 
 // A handy clear screen function that works on Linux
 function clear () {
-	console.log('\033[2J');
+	process.stdout.write('\033[2J');
 }
 
 // A handy set cursor function that works on Linux
 function setCursor (row, col) {
-	console.log("\033[" + row + ";" + col + "H");
+	process.stdout.write("\033[" + row + ";" + col + "H");
 }
