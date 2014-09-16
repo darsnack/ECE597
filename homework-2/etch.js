@@ -14,8 +14,8 @@ var leftButton = 'P9_11',
 	leftLED = 'P9_21',
 	rightLED = 'P9_22',
 	upLED = 'P9_23',
-	downLED = 'P9_41',
-	drawLED = 'P9_42';
+	downLED = 'P9_24',
+	drawLED = 'P9_26';
 
 // Global variables
 var ROW_SIZE = 21;
@@ -111,6 +111,11 @@ function drawScreen () {
 		bone.digitalWrite(drawLED, bone.LOW);
 	}
 
+	bone.digitalWrite(leftLED, bone.LOW);
+	bone.digitalWrite(rightLED, bone.LOW);
+	bone.digitalWrite(upLED, bone.LOW);
+	bone.digitalWrite(downLED, bone.LOW);
+
 	if (refersh) {
 		for (var i = 0; i < ROW_SIZE; i++) {
 			for (var j = 0; j < COL_SIZE; j++) {
@@ -136,11 +141,13 @@ function processButton (button) {
 
 	if (draw) {
 		grid[currentRow][currentCol] = 'x';
+		prevGrid[currentRow][currentCol] = 'c';
 	} else {
 		prevGrid[currentRow][currentCol] = 'c';
 	}
 
 	if (button === 'left') {
+		bone.digitalWrite(leftLED, bone.HIGH);
 		if (currentCol <= 0) {
 			currentCol = 0;
 		} else{
@@ -149,6 +156,7 @@ function processButton (button) {
 
 		refersh = true;
 	} else if (button === 'right') {
+		bone.digitalWrite(rightLED, bone.HIGH);
 		if (currentCol >= COL_SIZE - 1) {
 			currentCol = COL_SIZE - 1;
 		} else{
@@ -157,6 +165,7 @@ function processButton (button) {
 
 		refersh = true;
 	} else if (button === 'up') {
+		bone.digitalWrite(upLED, bone.HIGH);
 		if (currentRow <= 0) {
 			currentRow = 0;
 		} else{
@@ -165,6 +174,7 @@ function processButton (button) {
 
 		refersh = true;
 	} else if (button === 'down') {
+		bone.digitalWrite(downLED, bone.HIGH);
 		if (currentRow >= ROW_SIZE - 1) {
 			currentRow = ROW_SIZE - 1;
 		} else{
