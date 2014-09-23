@@ -1,15 +1,20 @@
 #!/usr/bin/env node
+"use strict";
+
 var bone = require('bonescript'),
 	shell = require('shelljs'),
+	async = require('async'),
 	i2c = require('i2c');
 
-var MATRIX_ADDR = '0x70';
+// I2C Parameters
+var I2C_BUS = '/dev/i2c-1',
+	MATRIX_ADDR = '0x70';
 
 // Inputs and outputs
-var leftButton = 'P9_11',
-	rightButton = 'P9_12',
-	upButton = 'P9_13',
-	downButton = 'P9_14',
+var rightButton = 'P9_11',
+	leftButton = 'P9_12',
+	downButton = 'P9_13',
+	upButton = 'P9_14',
 	drawButton = 'P9_15',
 	clearButton = 'P9_16',
 	leftLED = 'P9_21',
@@ -19,32 +24,31 @@ var leftButton = 'P9_11',
 	drawLED = 'P9_26';
 
 // Global variables
-var ROW_SIZE = 8;
-var COL_SIZE = 8;
-var draw = false;
-var refersh = true;
-var initInt = true;
-var matrix = new i2c(MATRIX_ADDR, {device: '/dev/i2c-1'});
-var grid = new Array(ROW_SIZE);
-var prevGrid = new Array(ROW_SIZE);
-var currentRow = ROW_SIZE / 2,
+var ROW_SIZE = 8,
+	COL_SIZE = 8,
+	draw = false,
+	refersh = true,
+	initialized = false,
+	matrix = new i2c(MATRIX_ADDR, {device: I2C_BUS, debug: false}),
+	grid = new Array(ROW_SIZE),
+	prevGrid = new Array(ROW_SIZE),
+	currentRow = ROW_SIZE / 2,
 	currentCol = COL_SIZE / 2;
 
-init();
-clearScreen();
-//setupScreen();
-initInterrupts();
-setInterval(drawScreen, 10);
+initArrays(); // Initialize grid arrays
+clearScreen(); // Set grid to all 'off'
+initDevices(); // Initialize interrupts and matrix
+wipeMatrix(); // Clear matrix screen
+setInterval(drawScreen, 10); // Start drawing
 
-
-function init () {
+function initArrays () {
 	for (var i = 0; i < ROW_SIZE; i++) {
 		grid[i] = new Array(COL_SIZE);
 		prevGrid[i] = new Array(COL_SIZE);
-	};
+	}
 }
 
-function initInterrupts () {
+function initDevices () {
 	// Set up pins
 	bone.pinMode(leftButton, bone.INPUT, 7, 'pulldown');
 	bone.pinMode(rightButton, bone.INPUT, 7, 'pulldown');
@@ -66,11 +70,24 @@ function initInterrupts () {
 	bone.attachInterrupt(clearButton, true, bone.FALLING, function (x) {processButton('clear');});
 	bone.attachInterrupt(drawButton, true, bone.FALLING, function (x) {processButton('draw');});
 
-	matrix.writeBytes(0x21, 0x00); // 8x8 Bi-Color LED Matrix Set-up
-	matrix.writeBytes(0x81, 0x00); // Display on and no blinking
-	matrix.writeBytes(0xE7, 0x00); // Configures the brightness
-
-	initInt = false;
+	async.waterfall([
+		function (callback) {
+			matrix.writeByte(0x21); // 8x8 Bi-Color LED Matrix Set-up
+			callback(null);
+		},
+		function (callback) {
+			matrix.writeByte(0x81); // Display on and no blinking
+			callback(null);
+		},
+		function (callback) {
+			matrix.writeByte(0xE7); // Configures the brightness
+			callback(null);
+		}
+	], function (error) {
+		if (error) {
+			console.log(error);
+		}
+	});
 }
 
 function clearScreen () {
@@ -78,38 +95,11 @@ function clearScreen () {
 		for (var j = 0; j < COL_SIZE; j++) {
 			grid[i][j] = 'off';
 			prevGrid[i][j] = 'yellow';
-		};
-	};
+		}
+	}
 
 	refersh = true;
 }
-
-// function setupScreen () {
-// 	clear();
-
-// 	setCursor(0, 0);
-
-// 	for (var i = 0; i < COL_SIZE; i++) {
-// 		process.stdout.write('_');
-// 	};
-
-// 	process.stdout.write('\n');
-
-// 	for (var i = 0; i < ROW_SIZE; i++) {
-// 		process.stdout.write('|');
-// 		for (var j = 0; j < COL_SIZE; j++) {
-// 			process.stdout.write(grid[i][j]);
-// 			prevGrid[i][j] = grid[i][j];
-// 		};
-// 		process.stdout.write('|\n');
-// 	};
-
-// 	for (var i = 0; i < COL_SIZE; i++) {
-// 		process.stdout.write('_');
-// 	};
-
-// 	refersh = false;
-// }
 
 function drawScreen () {
 	if (draw) {
@@ -132,15 +122,15 @@ function drawScreen () {
 					setColor(i, j, grid[i][j]);
 				}
 				prevGrid[i][j] = grid[i][j];
-			};
-		};
+			}
+		}
 
 		refersh = false;
 	}
 }
 
 function processButton (button) {
-	if (initInt) {
+	if (!initialized) {
 		return;
 	}
 
@@ -198,22 +188,56 @@ function setColor (row, column, color) {
 	var cmd = row * 2;
 	var status;
 
-	matrix.readBytes(cmd, 2, function (error, result) {
+	async.waterfall([
+		function (callback) {
+			matrix.readBytes(cmd, 2, function (error, result) {
+				if (error) {
+					callback("in readBytes: " + error);
+				} else {
+					callback(null, result);
+				}
+			});
+		},
+		function (status, callback) {
+			if (color === 'red') {
+				matrix.writeBytes(cmd, [status[0] & ~(1 << column), status[1] | (1 << column)]);
+			} else if (color === 'green') {
+				matrix.writeBytes(cmd, [status[0] | (1 << column), status[1] & ~(1 << column)]);
+			} else if (color === 'yellow') {
+				matrix.writeBytes(cmd, [status[0] | (1 << column), status[1] | (1 << column)]);
+			} else {
+				matrix.writeBytes(cmd, [status[0] & ~(1 << column), status[1] & ~(1 << column)]);
+			}
+
+			callback(null);
+		}
+	], function (error, result) {
 		if (error) {
-			console.log("Error getting matrix row info: " + error);
-		} else {
-			status = result;
-			console.log(status[0]);
+			console.log("Error with waterfall: " + error);
 		}
 	});
+}
 
-	if (color === 'red') {
-		matrix.writeBytes(cmd, [0x00, status[1] | (1 << column)]);
-	} else if (color === 'green') {
-		matrix.writeBytes(cmd, [status[0] | (1 << column), 0x00]);
-	} else if (color === 'yellow') {
-		matrix.writeBytes(cmd, [status[0] | (1 << column), status[1] | (1 << column)]);
-	} else {
-		matrix.writeBytes(cmd, [status[0] & ~(1 << column), status[1] & ~(1 << column)]);
-	}
+function wipeMatrix () {
+	var i = 0
+	async.whilst(
+		function () { return i < ROW_SIZE; },
+		function (callback) {
+			matrix.writeBytes(i, 0x00, function (error) {
+				if (error) {
+					callback("in writeBytes: " + error);
+				} else {
+					i++;
+					callback(null);
+				}
+			});
+		},
+		function (error) {
+			if (error) {
+				console.log("Error while wiping matrix: " + error);
+			}
+		}
+	);
+
+	initialized = true;
 }
