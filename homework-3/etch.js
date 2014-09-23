@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 var bone = require('bonescript'),
 	shell = require('shelljs'),
-	process = require('process');
+	i2c = require('i2c');
 
 var MATRIX_ADDR = '0x70';
 
@@ -19,19 +19,20 @@ var leftButton = 'P9_11',
 	drawLED = 'P9_26';
 
 // Global variables
-var ROW_SIZE = 21;
-var COL_SIZE = 43;
+var ROW_SIZE = 8;
+var COL_SIZE = 8;
 var draw = false;
 var refersh = true;
 var initInt = true;
+var matrix = new i2c(MATRIX_ADDR, {device: '/dev/i2c-1'});
 var grid = new Array(ROW_SIZE);
 var prevGrid = new Array(ROW_SIZE);
-var currentRow = (ROW_SIZE - 1) / 2,
-	currentCol = (COL_SIZE - 1) / 2;
+var currentRow = ROW_SIZE / 2,
+	currentCol = COL_SIZE / 2;
 
 init();
 clearScreen();
-setupScreen();
+//setupScreen();
 initInterrupts();
 setInterval(drawScreen, 10);
 
@@ -65,45 +66,50 @@ function initInterrupts () {
 	bone.attachInterrupt(clearButton, true, bone.FALLING, function (x) {processButton('clear');});
 	bone.attachInterrupt(drawButton, true, bone.FALLING, function (x) {processButton('draw');});
 
+	matrix.writeBytes(0x21, 0x00); // 8x8 Bi-Color LED Matrix Set-up
+	matrix.writeBytes(0x81, 0x00); // Display on and no blinking
+	matrix.writeBytes(0xE7, 0x00); // Configures the brightness
+
 	initInt = false;
 }
 
 function clearScreen () {
 	for (var i = 0; i < ROW_SIZE; i++) {
 		for (var j = 0; j < COL_SIZE; j++) {
-			grid[i][j] = {'green': 0x00, 'red': 0x00};
+			grid[i][j] = 'off';
+			prevGrid[i][j] = 'yellow';
 		};
 	};
 
 	refersh = true;
 }
 
-function setupScreen () {
-	clear();
+// function setupScreen () {
+// 	clear();
 
-	setCursor(0, 0);
+// 	setCursor(0, 0);
 
-	for (var i = 0; i < COL_SIZE; i++) {
-		process.stdout.write('_');
-	};
+// 	for (var i = 0; i < COL_SIZE; i++) {
+// 		process.stdout.write('_');
+// 	};
 
-	process.stdout.write('\n');
+// 	process.stdout.write('\n');
 
-	for (var i = 0; i < ROW_SIZE; i++) {
-		process.stdout.write('|');
-		for (var j = 0; j < COL_SIZE; j++) {
-			process.stdout.write(grid[i][j]);
-			prevGrid[i][j] = grid[i][j];
-		};
-		process.stdout.write('|\n');
-	};
+// 	for (var i = 0; i < ROW_SIZE; i++) {
+// 		process.stdout.write('|');
+// 		for (var j = 0; j < COL_SIZE; j++) {
+// 			process.stdout.write(grid[i][j]);
+// 			prevGrid[i][j] = grid[i][j];
+// 		};
+// 		process.stdout.write('|\n');
+// 	};
 
-	for (var i = 0; i < COL_SIZE; i++) {
-		process.stdout.write('_');
-	};
+// 	for (var i = 0; i < COL_SIZE; i++) {
+// 		process.stdout.write('_');
+// 	};
 
-	refersh = false;
-}
+// 	refersh = false;
+// }
 
 function drawScreen () {
 	if (draw) {
@@ -121,11 +127,9 @@ function drawScreen () {
 		for (var i = 0; i < ROW_SIZE; i++) {
 			for (var j = 0; j < COL_SIZE; j++) {
 				if (i === currentRow && j === currentCol) {
-					setCursor(i, j);
-					process.stdout.write('+');
+					setColor(i, j, 'red');
 				} else if (grid[i][j] !== prevGrid[i][j]) {
-					setCursor(i, j)
-					process.stdout.write(grid[i][j]);
+					setColor(i, j, grid[i][j]);
 				}
 				prevGrid[i][j] = grid[i][j];
 			};
@@ -141,10 +145,10 @@ function processButton (button) {
 	}
 
 	if (draw) {
-		grid[currentRow][currentCol] = 'x';
-		prevGrid[currentRow][currentCol] = 'c';
+		grid[currentRow][currentCol] = 'green';
+		prevGrid[currentRow][currentCol] = 'yellow';
 	} else {
-		prevGrid[currentRow][currentCol] = 'c';
+		prevGrid[currentRow][currentCol] = 'yellow';
 	}
 
 	if (button === 'left') {
@@ -199,26 +203,17 @@ function setColor (row, column, color) {
 			console.log("Error getting matrix row info: " + error);
 		} else {
 			status = result;
+			console.log(status[0]);
 		}
 	});
 
 	if (color === 'red') {
-		matrix.writeBytes(cmd, [0x00, status.red | (1 << column)]);
+		matrix.writeBytes(cmd, [0x00, status[1] | (1 << column)]);
 	} else if (color === 'green') {
-		matrix.writeBytes(cmd, [status.green | (1 << column), 0x00]);
+		matrix.writeBytes(cmd, [status[0] | (1 << column), 0x00]);
 	} else if (color === 'yellow') {
-		matrix.writeBytes(cmd, [status.green | (1 << column), status.red | (1 << column)]);
+		matrix.writeBytes(cmd, [status[0] | (1 << column), status[1] | (1 << column)]);
 	} else {
-		matrix.writeBytes(cmd, [status.green & ~(1 << column), status.red & ~(1 << column)]);
+		matrix.writeBytes(cmd, [status[0] & ~(1 << column), status[1] & ~(1 << column)]);
 	}
-}
-
-// A handy clear screen function that works on Linux
-function clear () {
-	process.stdout.write('\033[2J');
-}
-
-// A handy set cursor function that works on Linux
-function setCursor (row, col) {
-	process.stdout.write("\033[" + row + ";" + col + "H");
 }
