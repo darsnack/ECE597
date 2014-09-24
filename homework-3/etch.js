@@ -148,60 +148,36 @@ function setColor (row, column, color) {
 
 	async.waterfall([
 		function (callback) {
-			matrix.readBytes(green, 1, function (error, result) {
+			shell.exec('i2cget -y 1 ' + MATRIX_ADDR + ' 0x' + green.toString(16), {silent:true}, function (error, output) {
 				if (error) {
-					callback("in readBytes: " + error);
-				} else {
-					callback(null, result[0]);
+					callback("in i2cget for green row: " + error);
+				} else{
+					callback(null, parseInt(output, 16));
 				}
 			});
 		},
 		function (greenOutput, callback) {
-			matrix.readBytes(red, 1, function (error, result) {
+			shell.exec('i2cget -y 1 ' + MATRIX_ADDR + ' 0x' + red.toString(16), {silent:true}, function (error, output) {
 				if (error) {
-					callback("in readBytes: " + error);
-				} else {
-					callback(null, greenOutput, result[0]);
+					callback("in i2cget for red row: " + error);
+				} else{
+					callback(null, greenOutput, parseInt(output, 16));
 				}
 			});
 		},
 		function (greenOutput, redOutput, callback) {
 			if (color === 'red') {
-				matrix.writeBytes(red, [redOutput | (1 << column)], function (error) {
-					if (error) {
-						callback("in writeBytes for red: " + error);
-					}
-				});
+				shell.exec('i2cset -y 1 ' + MATRIX_ADDR + ' 0x' + green.toString(16) + ' 0x' + (greenOutput & ~(1 << column)).toString(16));
+				shell.exec('i2cset -y 1 ' + MATRIX_ADDR + ' 0x' + red.toString(16) + ' 0x' + (redOutput | (1 << column)).toString(16));
 			} else if (color === 'green') {
-				matrix.writeBytes(green, [greenOutput | (1 << column)], function (error) {
-					if (error) {
-						callback("in writeBytes for green: " + error);
-					}
-				});
+				shell.exec('i2cset -y 1 ' + MATRIX_ADDR + ' 0x' + green.toString(16) + ' 0x' + (greenOutput | (1 << column)).toString(16));
+				shell.exec('i2cset -y 1 ' + MATRIX_ADDR + ' 0x' + red.toString(16) + ' 0x' + (redOutput & ~(1 << column)).toString(16));
 			} else if (color === 'yellow') {
-				matrix.writeBytes(green, [greenOutput | (1 << column), redOutput | (1 << column)], function (error) {
-					if (error) {
-						callback("in writeBytes for yellow: " + error);
-					}
-				});
-			} else if (color === 'clearred') {
-				matrix.writeBytes(red, [redOutput & ~(1 << column)], function (error) {
-					if (error) {
-						callback("in writeBytes for clearred: " + error);
-					}
-				});
-			} else if (color === 'cleargreen') {
-				matrix.writeBytes(green, [greenOutput & ~(1 << column)], function (error) {
-					if (error) {
-						callback("in writeBytes for cleargreen: " + error);
-					}
-				});
+				shell.exec('i2cset -y 1 ' + MATRIX_ADDR + ' 0x' + green.toString(16) + ' 0x' + (greenOutput | (1 << column)).toString(16));
+				shell.exec('i2cset -y 1 ' + MATRIX_ADDR + ' 0x' + red.toString(16) + ' 0x' + (redOutput | (1 << column)).toString(16));
 			} else {
-				matrix.writeBytes(green, [greenOutput & ~(1 << column), redOutput & ~(1 << column)], function (error) {
-					if (error) {
-						callback("in writeBytes for off: " + error);
-					}
-				});
+				shell.exec('i2cset -y 1 ' + MATRIX_ADDR + ' 0x' + green.toString(16) + ' 0x' + (greenOutput & ~(1 << column)).toString(16));
+				shell.exec('i2cset -y 1 ' + MATRIX_ADDR + ' 0x' + red.toString(16) + ' 0x' + (redOutput & ~(1 << column)).toString(16));
 			}
 
 			callback(null);
@@ -227,10 +203,10 @@ function wipeMatrix () {
 	async.whilst(
 		function () { return i < ROW_SIZE * 2; },
 		function (callback) {
-			matrix.writeBytes(i, [0x00], function (error) {
+			shell.exec('i2cset -y 1 ' + MATRIX_ADDR + ' 0x' + i.toString(16) + ' ' + '0x00', function (error, output) {
 				if (error) {
-					callback("in writeBytes: " + error);
-				} else {
+					callback("in i2cset for wiping " + i + " row: " + error);
+				} else{
 					i++;
 					callback(null);
 				}
