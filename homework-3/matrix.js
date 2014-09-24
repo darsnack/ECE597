@@ -28,30 +28,60 @@ matrix.writeBytes(0x21, 0x00);            // 8x8 Bi-Color LED Matrix Set-up
 matrix.writeBytes(0x81, 0x00);            // Display on and no blinking
 matrix.writeBytes(brightness, 0x00);      // Configures the brightness
 
-setColor(0, 0, 'green');
-setColor(1, 1, 'red');
-setColor(2, 2, 'yellow');
-setTimeout(setColor, 2000, [0, 0, 'off']);
+matrix.readBytes(0x00, 1, function (error, result) {
+    if (error) {
+        console.log(error);
+    } else {
+        console.log("Green: 0x" + result[0].toString(16));
+    }
+});
+
+matrix.readBytes(0x01, 1, function (error, result) {
+    if (error) {
+        console.log(error);
+    } else {
+        console.log("Red: 0x" + result[0].toString(16));
+    }
+});
+
+matrix.writeBytes(0x00, [0x00], function (error) {
+    if (error) {
+        console.log(error);
+    } else {
+        console.log("cleared.");
+    }
+});
 
 function setColor (row, column, color) {
     var cmd = row * 2;
     var status;
 
-    matrix.readBytes(cmd, 2, function (error, result) {
+    async.waterfall([
+        function (callback) {
+            matrix.readBytes(cmd, 2, function (error, result) {
+                if (error) {
+                    callback("in readBytes: " + error);
+                } else {
+                    callback(null, result);
+                }
+            });
+        },
+        function (status, callback) {
+            if (color === 'red') {
+                matrix.writeBytes(cmd, [status[0] & ~(1 << column), status[1] | (1 << column)], null);
+            } else if (color === 'green') {
+                matrix.writeBytes(cmd, [status[0] | (1 << column), status[1] & ~(1 << column)], null);
+            } else if (color === 'yellow') {
+                matrix.writeBytes(cmd, [status[0] | (1 << column), status[1] | (1 << column)], null);
+            } else {
+                matrix.writeBytes(cmd, [status[0] & ~(1 << column), status[1] & ~(1 << column)], null);
+            }
+
+            callback(null);
+        }
+    ], function (error, result) {
         if (error) {
-            console.log("Error getting matrix row info: " + error);
-        } else {
-            status = result;
+            console.log("Error with waterfall: " + error);
         }
     });
-
-    if (color === 'red') {
-        matrix.writeBytes(cmd, [0x00, status.red | (1 << column)]);
-    } else if (color === 'green') {
-        matrix.writeBytes(cmd, [status.green | (1 << column), 0x00]);
-    } else if (color === 'yellow') {
-        matrix.writeBytes(cmd, [status.green | (1 << column), status.red | (1 << column)]);
-    } else {
-        matrix.writeBytes(cmd, [status.green & ~(1 << column), status.red & ~(1 << column)]);
-    }
 }

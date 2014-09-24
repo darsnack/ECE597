@@ -17,10 +17,10 @@ var rightButton = 'P9_11',
 	upButton = 'P9_14',
 	drawButton = 'P9_15',
 	clearButton = 'P9_16',
-	leftLED = 'P9_21',
-	rightLED = 'P9_22',
-	upLED = 'P9_23',
-	downLED = 'P9_24',
+	rightLED = 'P9_21',
+	leftLED = 'P9_22',
+	downLED = 'P9_23',
+	upLED = 'P9_24',
 	drawLED = 'P9_26';
 
 // Global variables
@@ -70,17 +70,17 @@ function initDevices () {
 	bone.attachInterrupt(clearButton, true, bone.FALLING, function (x) {processButton('clear');});
 	bone.attachInterrupt(drawButton, true, bone.FALLING, function (x) {processButton('draw');});
 
-	async.waterfall([
+	async.series([
 		function (callback) {
-			matrix.writeByte(0x21); // 8x8 Bi-Color LED Matrix Set-up
+			matrix.writeBytes(0x21, [0x00]); // 8x8 Bi-Color LED Matrix Set-up
 			callback(null);
 		},
 		function (callback) {
-			matrix.writeByte(0x81); // Display on and no blinking
+			matrix.writeBytes(0x81, [0x00]); // Display on and no blinking
 			callback(null);
 		},
 		function (callback) {
-			matrix.writeByte(0xE7); // Configures the brightness
+			matrix.writeBytes(0xE7, [0x00]); // Configures the brightness
 			callback(null);
 		}
 	], function (error) {
@@ -185,28 +185,53 @@ function processButton (button) {
 }
 
 function setColor (row, column, color) {
-	var cmd = row * 2;
-	var status;
+	var green = row * 2,
+		red = row * 2 + 1;
 
 	async.waterfall([
 		function (callback) {
-			matrix.readBytes(cmd, 2, function (error, result) {
+			matrix.readBytes(green, 1, function (error, result) {
 				if (error) {
 					callback("in readBytes: " + error);
 				} else {
-					callback(null, result);
+					callback(null, result[0]);
 				}
 			});
 		},
-		function (status, callback) {
+		function (greenOutput, callback) {
+			matrix.readBytes(red, 1, function (error, result) {
+				if (error) {
+					callback("in readBytes: " + error);
+				} else {
+					callback(null, greenOutput, result[0]);
+				}
+			});
+		},
+		function (greenOutput, redOutput, callback) {
 			if (color === 'red') {
-				matrix.writeBytes(cmd, [status[0] & ~(1 << column), status[1] | (1 << column)]);
+				matrix.writeBytes(green, [greenOutput & ~(1 << column), redOutput | (1 << column)], function (error) {
+					if (error) {
+						callback("in writeBytes for red: " + error);
+					}
+				});
 			} else if (color === 'green') {
-				matrix.writeBytes(cmd, [status[0] | (1 << column), status[1] & ~(1 << column)]);
+				matrix.writeBytes(green, [greenOutput | (1 << column), redOutput & ~(1 << column)], function (error) {
+					if (error) {
+						callback("in writeBytes for green: " + error);
+					}
+				});
 			} else if (color === 'yellow') {
-				matrix.writeBytes(cmd, [status[0] | (1 << column), status[1] | (1 << column)]);
+				matrix.writeBytes(green, [greenOutput | (1 << column), redOutput | (1 << column)], function (error) {
+					if (error) {
+						callback("in writeBytes for yellow: " + error);
+					}
+				});
 			} else {
-				matrix.writeBytes(cmd, [status[0] & ~(1 << column), status[1] & ~(1 << column)]);
+				matrix.writeBytes(green, [greenOutput & ~(1 << column), redOutput & ~(1 << column)], function (error) {
+					if (error) {
+						callback("in writeBytes for off: " + error);
+					}
+				});
 			}
 
 			callback(null);
@@ -221,9 +246,9 @@ function setColor (row, column, color) {
 function wipeMatrix () {
 	var i = 0
 	async.whilst(
-		function () { return i < ROW_SIZE; },
+		function () { return i < ROW_SIZE * 2; },
 		function (callback) {
-			matrix.writeBytes(i, 0x00, function (error) {
+			matrix.writeBytes(i, [0x00], function (error) {
 				if (error) {
 					callback("in writeBytes: " + error);
 				} else {
