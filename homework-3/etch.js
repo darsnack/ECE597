@@ -28,25 +28,13 @@ var ROW_SIZE = 8,
 	COL_SIZE = 8,
 	draw = false,
 	refersh = true,
-	initialized = false,
+	locked = true,
 	matrix = new i2c(MATRIX_ADDR, {device: I2C_BUS, debug: false}),
-	grid = new Array(ROW_SIZE),
-	prevGrid = new Array(ROW_SIZE),
 	currentRow = ROW_SIZE / 2,
 	currentCol = COL_SIZE / 2;
 
-initArrays(); // Initialize grid arrays
-clearScreen(); // Set grid to all 'off'
 initDevices(); // Initialize interrupts and matrix
 wipeMatrix(); // Clear matrix screen
-setInterval(drawScreen, 10); // Start drawing
-
-function initArrays () {
-	for (var i = 0; i < ROW_SIZE; i++) {
-		grid[i] = new Array(COL_SIZE);
-		prevGrid[i] = new Array(COL_SIZE);
-	}
-}
 
 function initDevices () {
 	// Set up pins
@@ -90,56 +78,16 @@ function initDevices () {
 	});
 }
 
-function clearScreen () {
-	for (var i = 0; i < ROW_SIZE; i++) {
-		for (var j = 0; j < COL_SIZE; j++) {
-			grid[i][j] = 'off';
-			prevGrid[i][j] = 'yellow';
-		}
-	}
-
-	refersh = true;
-}
-
-function drawScreen () {
-	if (draw) {
-		bone.digitalWrite(drawLED, bone.HIGH);
-	} else {
-		bone.digitalWrite(drawLED, bone.LOW);
-	}
-
-	bone.digitalWrite(leftLED, bone.LOW);
-	bone.digitalWrite(rightLED, bone.LOW);
-	bone.digitalWrite(upLED, bone.LOW);
-	bone.digitalWrite(downLED, bone.LOW);
-
-	if (refersh) {
-		for (var i = 0; i < ROW_SIZE; i++) {
-			for (var j = 0; j < COL_SIZE; j++) {
-				if (i === currentRow && j === currentCol) {
-					setColor(i, j, 'red');
-				} else if (grid[i][j] !== prevGrid[i][j]) {
-					setColor(i, j, grid[i][j]);
-				}
-				prevGrid[i][j] = grid[i][j];
-			}
-		}
-
-		refersh = false;
-	}
-}
-
 function processButton (button) {
-	if (!initialized) {
+	if (locked) {
 		return;
 	}
 
 	if (draw) {
-		grid[currentRow][currentCol] = 'green';
-		prevGrid[currentRow][currentCol] = 'yellow';
-	} else {
-		prevGrid[currentRow][currentCol] = 'yellow';
+		setColor(currentRow, currentCol, 'green');
 	}
+
+	setColor(currentRow, currentCol, 'clearred');
 
 	if (button === 'left') {
 		bone.digitalWrite(leftLED, bone.HIGH);
@@ -178,10 +126,20 @@ function processButton (button) {
 
 		refersh = true;
 	} else if (button === 'clear') {
-		clearScreen();
+		wipeMatrix();
 	} else if (button === 'draw') {
 		draw = !draw;
+
+		if (draw) {
+			bone.digitalWrite(drawLED, bone.HIGH);
+		} else {
+			bone.digitalWrite(drawLED, bone.LOW);
+		}
 	}
+
+	setColor(currentRow, currentCol, 'red');
+
+	setTimeout(clearLEDs, 10);
 }
 
 function setColor (row, column, color) {
@@ -209,13 +167,13 @@ function setColor (row, column, color) {
 		},
 		function (greenOutput, redOutput, callback) {
 			if (color === 'red') {
-				matrix.writeBytes(green, [greenOutput & ~(1 << column), redOutput | (1 << column)], function (error) {
+				matrix.writeBytes(red, [redOutput | (1 << column)], function (error) {
 					if (error) {
 						callback("in writeBytes for red: " + error);
 					}
 				});
 			} else if (color === 'green') {
-				matrix.writeBytes(green, [greenOutput | (1 << column), redOutput & ~(1 << column)], function (error) {
+				matrix.writeBytes(green, [greenOutput | (1 << column)], function (error) {
 					if (error) {
 						callback("in writeBytes for green: " + error);
 					}
@@ -224,6 +182,18 @@ function setColor (row, column, color) {
 				matrix.writeBytes(green, [greenOutput | (1 << column), redOutput | (1 << column)], function (error) {
 					if (error) {
 						callback("in writeBytes for yellow: " + error);
+					}
+				});
+			} else if (color === 'clearred') {
+				matrix.writeBytes(red, [redOutput & ~(1 << column)], function (error) {
+					if (error) {
+						callback("in writeBytes for clearred: " + error);
+					}
+				});
+			} else if (color === 'cleargreen') {
+				matrix.writeBytes(green, [greenOutput & ~(1 << column)], function (error) {
+					if (error) {
+						callback("in writeBytes for cleargreen: " + error);
 					}
 				});
 			} else {
@@ -243,7 +213,16 @@ function setColor (row, column, color) {
 	});
 }
 
+function clearLEDs () {
+	bone.digitalWrite(leftLED, bone.LOW);
+	bone.digitalWrite(rightLED, bone.LOW);
+	bone.digitalWrite(upLED, bone.LOW);
+	bone.digitalWrite(downLED, bone.LOW);
+}
+
 function wipeMatrix () {
+	locked = true;
+
 	var i = 0
 	async.whilst(
 		function () { return i < ROW_SIZE * 2; },
@@ -264,5 +243,7 @@ function wipeMatrix () {
 		}
 	);
 
-	initialized = true;
+	setColor(currentRow, currentCol, 'red');
+
+	locked = false;
 }
