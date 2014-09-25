@@ -39,8 +39,7 @@ initArrays(); // Initialize grid arrays
 clearScreen(); // Set grid to all 'off'
 initDevices(); // Initialize interrupts and matrix
 wipeMatrix(); // Clear matrix screen
-processButton('poop');
-//setInterval(drawScreen, 10); // Start drawing
+setInterval(drawScreen, 10); // Start drawing
 
 function initArrays () {
 	for (var i = 0; i < ROW_SIZE; i++) {
@@ -136,9 +135,10 @@ function processButton (button) {
 	}
 
 	if (draw) {
-		setColor(currentRow, currentCol, 'green');
+		grid[currentRow][currentCol] = 'green';
+		prevGrid[currentRow][currentCol] = 'yellow';
 	} else {
-		setColor(currentRow, currentCol, 'off');
+		prevGrid[currentRow][currentCol] = 'yellow';
 	}
 
 	if (button === 'left') {
@@ -182,8 +182,6 @@ function processButton (button) {
 	} else if (button === 'draw') {
 		draw = !draw;
 	}
-
-	setColor(currentRow, currentCol, 'red');
 }
 
 function setColor (row, column, color) {
@@ -211,99 +209,27 @@ function setColor (row, column, color) {
 		},
 		function (greenOutput, redOutput, callback) {
 			if (color === 'red') {
-				async.series([
-					function (callback2) {
-						matrix.writeBytes(green, [greenOutput & ~(1 << column)], function (error) {
-							if (error) {
-								callback("in writeBytes for red: " + error);
-							}
-						});
-					},
-					function (callback2) {
-						matrix.writeBytes(red, [redOutput | (1 << column)], function (error) {
-							if (error) {
-								callback("in writeBytes for red: " + error);
-							}
-						});
-					}
-				], function (error) {
+				matrix.writeBytes(green, [greenOutput & ~(1 << column), redOutput | (1 << column)], function (error) {
 					if (error) {
-						callback(error);
+						callback("in writeBytes for red: " + error);
 					}
 				});
 			} else if (color === 'green') {
-				async.series([
-					function (callback2) {
-						matrix.writeBytes(green, [greenOutput | (1 << column)], function (error) {
-							if (error) {
-								callback2("in writeBytes for red: " + error);
-							} else {
-								callback2(null);
-							}
-						});
-					},
-					function (callback2) {
-						matrix.writeBytes(red, [redOutput & ~(1 << column)], function (error) {
-							if (error) {
-								callback2("in writeBytes for red: " + error);
-							} else {
-								callback2(null);
-							}
-						});
-					}
-				], function (error) {
+				matrix.writeBytes(green, [greenOutput | (1 << column), redOutput & ~(1 << column)], function (error) {
 					if (error) {
-						callback(error);
+						callback("in writeBytes for green: " + error);
 					}
 				});
 			} else if (color === 'yellow') {
-				async.series([
-					function (callback2) {
-						matrix.writeBytes(green, [greenOutput | (1 << column)], function (error) {
-							if (error) {
-								callback2("in writeBytes for red: " + error);
-							} else {
-								callback2(null);
-							}
-						});
-					},
-					function (callback2) {
-						matrix.writeBytes(red, [redOutput | (1 << column)], function (error) {
-							if (error) {
-								callback2("in writeBytes for red: " + error);
-							} else {
-								callback2(null);
-							}
-						});
-					}
-				], function (error) {
+				matrix.writeBytes(green, [greenOutput | (1 << column), redOutput | (1 << column)], function (error) {
 					if (error) {
-						callback(error);
+						callback("in writeBytes for yellow: " + error);
 					}
 				});
 			} else {
-				async.series([
-					function (callback2) {
-						matrix.writeBytes(green, [greenOutput & ~(1 << column)], function (error) {
-							if (error) {
-								callback2("in writeBytes for red: " + error);
-							} else {
-								callback2(null);
-							}
-						});
-					},
-					function (callback2) {
-						matrix.writeBytes(red, [redOutput & ~(1 << column)], function (error) {
-							if (error) {
-								callback2("in writeBytes for red: " + error);
-							} else {
-								callback2(null);
-							}
-						});
-					}
-				], function (error) {
+				matrix.writeBytes(green, [greenOutput & ~(1 << column), redOutput & ~(1 << column)], function (error) {
 					if (error) {
-						callback(error);
+						callback("in writeBytes for off: " + error);
 					}
 				});
 			}
