@@ -11,16 +11,16 @@ var I2C_BUS = '/dev/i2c-1',
 	MATRIX_ADDR = '0x70';
 
 // Inputs and outputs
-var leftButton = 'P9_11',
-	rightButton = 'P9_12',
-	upButton = 'P9_13',
-	downButton = 'P9_14',
+var rightButton = 'P9_11',
+	leftButton = 'P9_12',
+	downButton = 'P9_13',
+	upButton = 'P9_14',
 	drawButton = 'P9_15',
 	clearButton = 'P9_16',
-	leftLED = 'P9_21',
-	rightLED = 'P9_22',
-	upLED = 'P9_23',
-	downLED = 'P9_24',
+	rightLED = 'P9_21',
+	leftLED = 'P9_22',
+	downLED = 'P9_23',
+	upLED = 'P9_24',
 	drawLED = 'P9_26';
 
 // Global variables
@@ -143,15 +143,6 @@ function processButton (button) {
 
 	if (button === 'left') {
 		bone.digitalWrite(leftLED, bone.HIGH);
-		if (currentCol >= COL_SIZE - 1) {
-			currentCol = COL_SIZE - 1;
-		} else{
-			currentCol++;
-		}
-
-		refersh = true;
-	} else if (button === 'right') {
-		bone.digitalWrite(rightLED, bone.HIGH);
 		if (currentCol <= 0) {
 			currentCol = 0;
 		} else{
@@ -159,21 +150,30 @@ function processButton (button) {
 		}
 
 		refersh = true;
+	} else if (button === 'right') {
+		bone.digitalWrite(rightLED, bone.HIGH);
+		if (currentCol >= COL_SIZE - 1) {
+			currentCol = COL_SIZE - 1;
+		} else{
+			currentCol++;
+		}
+
+		refersh = true;
 	} else if (button === 'up') {
 		bone.digitalWrite(upLED, bone.HIGH);
-		if (currentRow >= ROW_SIZE - 1) {
-			currentRow = ROW_SIZE - 1;
+		if (currentRow <= 0) {
+			currentRow = 0;
 		} else{
-			currentRow++;
+			currentRow--;
 		}
 
 		refersh = true;
 	} else if (button === 'down') {
 		bone.digitalWrite(downLED, bone.HIGH);
-		if (currentRow <= 0) {
-			currentRow = 0;
+		if (currentRow >= ROW_SIZE - 1) {
+			currentRow = ROW_SIZE - 1;
 		} else{
-			currentRow--;
+			currentRow++;
 		}
 
 		refersh = true;
