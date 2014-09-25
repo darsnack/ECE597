@@ -167,14 +167,16 @@ function setColor (row, column, color) {
 		},
 		function (greenOutput, redOutput, callback) {
 			if (color === 'red') {
-				shell.exec('i2cset -y 1 ' + MATRIX_ADDR + ' 0x' + green.toString(16) + ' 0x' + (greenOutput & ~(1 << column)).toString(16));
 				shell.exec('i2cset -y 1 ' + MATRIX_ADDR + ' 0x' + red.toString(16) + ' 0x' + (redOutput | (1 << column)).toString(16));
 			} else if (color === 'green') {
 				shell.exec('i2cset -y 1 ' + MATRIX_ADDR + ' 0x' + green.toString(16) + ' 0x' + (greenOutput | (1 << column)).toString(16));
-				shell.exec('i2cset -y 1 ' + MATRIX_ADDR + ' 0x' + red.toString(16) + ' 0x' + (redOutput & ~(1 << column)).toString(16));
 			} else if (color === 'yellow') {
 				shell.exec('i2cset -y 1 ' + MATRIX_ADDR + ' 0x' + green.toString(16) + ' 0x' + (greenOutput | (1 << column)).toString(16));
 				shell.exec('i2cset -y 1 ' + MATRIX_ADDR + ' 0x' + red.toString(16) + ' 0x' + (redOutput | (1 << column)).toString(16));
+			} else if (color === 'clearred') {
+				shell.exec('i2cset -y 1 ' + MATRIX_ADDR + ' 0x' + red.toString(16) + ' 0x' + (redOutput & ~(1 << column)).toString(16));
+			} else if (color === 'cleargreen') {
+				shell.exec('i2cset -y 1 ' + MATRIX_ADDR + ' 0x' + green.toString(16) + ' 0x' + (greenOutput & ~(1 << column)).toString(16));
 			} else {
 				shell.exec('i2cset -y 1 ' + MATRIX_ADDR + ' 0x' + green.toString(16) + ' 0x' + (greenOutput & ~(1 << column)).toString(16));
 				shell.exec('i2cset -y 1 ' + MATRIX_ADDR + ' 0x' + red.toString(16) + ' 0x' + (redOutput & ~(1 << column)).toString(16));
