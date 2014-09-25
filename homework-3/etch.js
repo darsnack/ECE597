@@ -2,7 +2,7 @@
 "use strict";
 
 var bone = require('bonescript'),
-	shell = require('shelljs'),
+	shell = require('child_process'),
 	async = require('async'),
 	i2c = require('i2c');
 
@@ -148,7 +148,7 @@ function setColor (row, column, color) {
 
 	async.waterfall([
 		function (callback) {
-			shell.exec('i2cget -y 1 ' + MATRIX_ADDR + ' 0x' + green.toString(16), {silent:true}, function (error, output) {
+			shell.exec('i2cget -y 1 ' + MATRIX_ADDR + ' 0x' + green.toString(16), function (error, output) {
 				if (error) {
 					callback("in i2cget for green row: " + error);
 				} else{
@@ -157,7 +157,7 @@ function setColor (row, column, color) {
 			});
 		},
 		function (greenOutput, callback) {
-			shell.exec('i2cget -y 1 ' + MATRIX_ADDR + ' 0x' + red.toString(16), {silent:true}, function (error, output) {
+			shell.exec('i2cget -y 1 ' + MATRIX_ADDR + ' 0x' + red.toString(16), function (error, output) {
 				if (error) {
 					callback("in i2cget for red row: " + error);
 				} else{
