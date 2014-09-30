@@ -1,0 +1,9 @@
+{
+	"name" : "my-project",
+	"version" : "1.0.0",
+	"dependencies" : 
+		{ "shelljs" : ">=0" },
+		{ "async" : ">=0"},
+		{ "process" : ">=0"},
+		{ "bonescript" : ">=0"}
+}
