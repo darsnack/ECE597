@@ -3,25 +3,33 @@
 var exec = require('child_process').exec,
 	bone = require('bonescript'),
 	async = require('async'),
-	matrix = require('i2c'),
+	i2c = require('i2c'),
 	fs = require('fs');
 
 // Make sure the rotary encoders are setup
 exec("/root/ECE597/resources/setupEQEP.sh");
 
+// eQEP directories
 var eQEP1 = "/sys/devices/ocp.3/48302000.epwmss/48302180.eqep/",
 	eQEP2 = "/sys/devices/ocp.3/48304000.epwmss/48304180.eqep/";
 
+// I2C Parameters
+var I2C_BUS = '/dev/i2c-1',
+	MATRIX_ADDR = '0x70';
+
+// Digital I/O
 var DRAW_LED = 'P9_26',
 	DRAW_BUTTON = 'P9_15',
 	CLEAR_BUTTON = 'P9_16';
 
+// Globals
 var ENCODER1 = 0,
 	ENCODER2 = 1,
 	MAX_ROW = 8,
 	MAX_COL = 8,
 	PERIOD = 100; // in ms
 
+// Global variables
 var currentRow = 0,
 	currentCol = 0,
 	prevRow = 0,
@@ -30,6 +38,8 @@ var currentRow = 0,
 	prevEncoder2Pos = 0,
 	locked = true,
 	draw = false;
+
+var matrix = new i2c(MATRIX_ADDR, {device: I2C_BUS, debug: false});
 
 setupButtons();
 setupEncoders();
@@ -61,14 +71,14 @@ function setupEncoders () {
 }
 
 function pollEncoders () {
-	fs.readFile(eQEP1, {encoding: 'utf8'}, function (error, data) {
+	fs.readFile(eQEP1 + 'position', {encoding: 'utf8'}, function (error, data) {
 		if (error) {
 			console.log("Error reading data for eQEP1: " + error);
 		} else {
 			processPosition(ENCODER1, data);
 		}
 	});
-	fs.readFile(eQEP2, {encoding: 'utf8'}, function (error, data) {
+	fs.readFile(eQEP2 + 'position', {encoding: 'utf8'}, function (error, data) {
 		if (error) {
 			console.log("Error reading data for eQEP2: " + error);
 		} else{
@@ -83,8 +93,10 @@ function processPosition (encoderIndex, position, drawCallback) {
 
 	if (encoderIndex === ENCODER1) { // Left-right encoder
 		currentCol = currentCol + (position - prevEncoder1Pos);
+		prevEncoder1Pos = position;
 	} else if (encoderIndex === ENCODER2) { // Up-down encoder
 		currentRow = currentRow + (position - prevEncoder2Pos);
+		prevEncoder2Pos = position;
 	}
 
 	if (currentRow > MAX_ROW - 1) {
@@ -98,6 +110,8 @@ function processPosition (encoderIndex, position, drawCallback) {
 	} else if (currentCol < 0) {
 		currentCol = 0;
 	}
+
+	drawMatrix();
 }
 
 function setupMatrix () {
@@ -115,7 +129,7 @@ function setupMatrix () {
 			callback(null);
 		},
 		function (callback) {
-			claerMatrix();
+			clearMatrix();
 			callback(null);
 		}
 	], function (error) {
@@ -132,7 +146,7 @@ function clearMatrix () {
 
 	var i = 0
 	async.whilst(
-		function () { return i < ROW_SIZE * 2; },
+		function () { return i < MAX_ROW * 2; },
 		function (callback) {
 			matrix.writeBytes(i, [0x00], function (error) {
 				if (error) {
@@ -155,7 +169,7 @@ function clearMatrix () {
 	locked = false;
 }
 
-function drawMatrix (argument) {
+function drawMatrix () {
 	setColor(prevRow, prevCol, 'clearred');
 
 	if (draw) {

@@ -1,11 +1,12 @@
-#!/usr/bin/bash
+#!/bin/bash
 
 RESOURCES=/root/ECE597/resources
 LIB=/lib/firmware
 SLOTS=/sys/devices/bone_capemgr.*/slots
 
 echo "Compiling up eQEP1 framework..."
-OUT=$(ls $RESOURCES | grep bone_eqep1.dts)
+ls $RESOURCES | grep bone_eqep1.dts
+OUT=$?
 if [[ $OUT -eq 0 ]]; then
 	OUT=$(dtc -O dtb -o $RESOURCES/bone_eqep1-00A0.dtbo -b 0 -@ $RESOURCES/bone_eqep1.dts)
 else
@@ -20,7 +21,8 @@ else
 fi
 
 echo "Compiling eQEP2 framework..."
-OUT=$(ls $RESOURCES | grep bone_eqep2.dts)
+ls $RESOURCES | grep bone_eqep2.dts
+OUT=$?
 if [[ $OUT -eq 0 ]]; then
 	OUT=$(dtc -O dtb -o $RESOURCES/bone_eqep2-00A0.dtbo -b 0 -@ $RESOURCES/bone_eqep2.dts)
 else
