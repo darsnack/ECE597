@@ -21,10 +21,10 @@
        __overlay__ {
            pinctrl_eqep1: pinctrl_eqep1_pins {
                pinctrl-single,pins = <					 				   
-		 0x038 0x24  /* P8_16 = GPIO2_12 = EQEP2_index,  MODE4 */ 
-		 0x03C 0x24  /* P8_15 = GPIO2_13 = EQEP2_strobe, MODE4 */
-		 0x030 0x34  /* P8_12 = GPIO2_10 = EQEP2A_in,    MODE4 */
-		 0x034 0x34  /* P8_11 = GPIO2_11 = EQEP2B_in,    MODE4 */
+		 0x0D8 0x24  /* P8_31 = GPIO2_12 = EQEP1_index,  MODE4 */ 
+		 0x0DC 0x24  /* P8_32 = GPIO2_13 = EQEP1_strobe, MODE4 */
+		 0x0D0 0x34  /* P8_35 = GPIO2_10 = EQEP1A_in,    MODE4 */
+		 0x0D4 0x34  /* P8_33 = GPIO2_11 = EQEP1B_in,    MODE4 */
 		 /* From: https://groups.google.com/forum/#!searchin/beagleboard/eQep/beagleboard/Orp3tFcNgCc/mYacP_GkCQQJ */
                >;
            };
