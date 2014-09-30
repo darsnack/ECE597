@@ -3,6 +3,7 @@
 var exec = require('child_process').exec,
 	bone = require('bonescript'),
 	async = require('async'),
+	matrix = require('i2c'),
 	fs = require('fs');
 
 // Make sure the rotary encoders are setup
