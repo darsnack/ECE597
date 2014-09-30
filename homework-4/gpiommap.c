@@ -18,6 +18,7 @@
 int main(int argc, char const *argv[]) {
 
 	volatile void *gpio_addr;
+	volatile unsigned int *gpio_datain;
 	volatile unsigned int *gpio_setdataout_addr;
 	volatile unsigned int *gpio_cleardataout_addr;
 	int fd = open("/dev/mem", O_RDWR);
@@ -27,15 +28,17 @@ int main(int argc, char const *argv[]) {
 	gpio_setdataout_addr = gpio_addr + GPIO_SETDATAOUT;
 	gpio_cleardataout_addr = gpio_addr + GPIO_CLEARDATAOUT;
 
+	*gpio_cleardataout_addr = LED0 | LED1;
+
 	while(1) {
 		if (*gpio_datain & SW0)
-			*gpio_setdataout_addr = *gpio_setdataout_addr | LED0;
+			*gpio_setdataout_addr = LED0;
 		else if (*gpio_datain & SW1)
-			*gpio_setdataout_addr = *gpio_setdataout_addr | LED1;
+			*gpio_setdataout_addr = LED1;
 		else if (*gpio_datain & (SW0 | SW1))
-			*gpio_setdataout_addr = *gpio_setdataout_addr | LED0 | LED1;
+			*gpio_setdataout_addr = LED0 | LED1;
 		else
-			*gpio_setdataout_addr = *gpio_setdataout_addr & ~(LED0 | LED1);
+			*gpio_cleardataout_addr = LED0 | LED1;
 	}
 
 	return 0;
