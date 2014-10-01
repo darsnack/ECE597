@@ -92,10 +92,10 @@ function processPosition (encoderIndex, position, drawCallback) {
 	prevCol = currentCol;
 
 	if (encoderIndex === ENCODER1) { // Left-right encoder
-		currentCol = currentCol + (position - prevEncoder1Pos);
+		currentCol = currentCol + (position - prevEncoder1Pos) / 4;
 		prevEncoder1Pos = position;
 	} else if (encoderIndex === ENCODER2) { // Up-down encoder
-		currentRow = currentRow + (position - prevEncoder2Pos);
+		currentRow = currentRow + (position - prevEncoder2Pos) / 4;
 		prevEncoder2Pos = position;
 	}
 
@@ -111,7 +111,9 @@ function processPosition (encoderIndex, position, drawCallback) {
 		currentCol = 0;
 	}
 
-	drawMatrix();
+	if (currentRow !== prevRow || currentCol !== prevCol) {
+		drawMatrix();
+	}
 }
 
 function setupMatrix () {
@@ -185,30 +187,35 @@ function setColor (row, column, color) {
 
 	async.waterfall([
 		function (callback) {
-			matrix.readBytes(green, 1, function (error, result) {
-				if (error) {
-					callback("in readBytes: " + error);
-				} else {
-					callback(null, result[0]);
-				}
-			});
+			// matrix.readBytes(green, 1, function (error, result) {
+			// 	if (error) {
+			// 		callback("in readBytes: " + error);
+			// 	} else {
+			// 		callback(null, result[0]);
+			// 	}
+			// });
+			var result = exec("i2cget -y 1 " + MATRIX_ADDR + " " + green.toString(16));
+			callback(null, result);
 		},
 		function (greenOutput, callback) {
-			matrix.readBytes(red, 1, function (error, result) {
-				if (error) {
-					callback("in readBytes: " + error);
-				} else {
-					callback(null, greenOutput, result[0]);
-				}
-			});
+			// matrix.readBytes(red, 1, function (error, result) {
+			// 	if (error) {
+			// 		callback("in readBytes: " + error);
+			// 	} else {
+			// 		callback(null, greenOutput, result[0]);
+			// 	}
+			// });
+			var result = exec("i2cget -y 1 " + MATRIX_ADDR + " " + red.toString(16));
+			callback(null, greenOutput, result);
 		},
 		function (greenOutput, redOutput, callback) {
 			if (color === 'red') {
-				matrix.writeBytes(red, [redOutput | (1 << column)], function (error) {
-					if (error) {
-						callback("in writeBytes for red: " + error);
-					}
-				});
+				// matrix.writeBytes(red, [redOutput | (1 << column)], function (error) {
+				// 	if (error) {
+				// 		callback("in writeBytes for red: " + error);
+				// 	}
+				// });
+				exec("i2cset -y 1 " + MATRIX_ADDR + " " + red.toString(16) + " " + (redOutput | (1 << column)).toString(16));
 			} else if (color === 'green') {
 				matrix.writeBytes(green, [greenOutput | (1 << column)], function (error) {
 					if (error) {
@@ -222,7 +229,7 @@ function setColor (row, column, color) {
 					}
 				});
 			} else if (color === 'clearred') {
-				matrix.writeBytes(red, [redOutput & ~(1 << column)], function (error) {
+				matrix.writeBytes(green, [greenOutput, 0x00], function (error) {
 					if (error) {
 						callback("in writeBytes for clearred: " + error);
 					}
@@ -254,6 +261,20 @@ function setupButtons () {
 	bone.pinMode(DRAW_BUTTON, bone.INPUT, 7, 'pulldown');
 	bone.pinMode(CLEAR_BUTTON, bone.INPUT, 7, 'pulldown');
 	bone.pinMode(DRAW_LED, bone.OUTPUT);
-	bone.attachInterrupt(DRAW_BUTTON, true, bone.FALLING, function (x) {draw = !draw;});
-	bone.attachInterrupt(CLEAR_BUTTON, true, bone.FALLING, function (x) {clearMatrix();});
+	bone.attachInterrupt(DRAW_BUTTON, true, bone.FALLING, function (x) {
+		if (!locked) {
+			draw = !draw;
+		}
+
+		if (draw) {
+			bone.digitalWrite(DRAW_LED, bone.HIGH);
+		} else {
+			bone.digitalWrite(DRAW_LED, bone.LOW);
+		}
+	});
+	bone.attachInterrupt(CLEAR_BUTTON, true, bone.FALLING, function (x) {
+		if (!locked) {
+			clearMatrix();
+		}
+	});
 }
