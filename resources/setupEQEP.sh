@@ -50,14 +50,23 @@ fi
 echo "...success."
 
 echo "Adding to \$SLOTS..."
-OUT=$(echo bone_eqep1 > $SLOTS)
+cat $SLOTS | grep bone_eqep1 > /dev/null
+OUT=$?
 if [[ $OUT -eq 1 ]]; then
-	echo "...failed for bone_eqep1."
-	kill -SIGINT $$
+	OUT=$(echo bone_eqep1 > $SLOTS)
+	if [[ $OUT -eq 1 ]]; then
+		echo "...failed for bone_eqep1."
+		kill -SIGINT $$
+	fi
 fi
-OUT=$(echo bone_eqep2 > $SLOTS)
+cat $SLOTS | grep bone_eqep2 > /dev/null
+OUT=$?
 if [[ $OUT -eq 1 ]]; then
-	echo "...failed for bone_eqep2."
-	kill -SIGINT $$
+	OUT=$(echo bone_eqep2 > $SLOTS)
+	if [[ $OUT -eq 1 ]]; then
+		echo "...failed for bone_eqep2."
+		kill -SIGINT $$
+	fi
+	echo "...success."
 fi
 echo "...success."

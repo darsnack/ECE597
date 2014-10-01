@@ -39,6 +39,9 @@ var currentRow = 0,
 	locked = true,
 	draw = false;
 
+var green = [],
+	red = [];
+
 var matrix = new i2c(MATRIX_ADDR, {device: I2C_BUS, debug: false});
 
 setupButtons();
@@ -154,6 +157,11 @@ function clearMatrix () {
 				if (error) {
 					callback("in writeBytes: " + error);
 				} else {
+					if (i % 2 === 0) {
+						green[i / 2] = 0x00;
+					} else {
+						red[(i - 1) / 2] = 0x00;
+					}
 					i++;
 					callback(null);
 				}
@@ -182,79 +190,28 @@ function drawMatrix () {
 }
 
 function setColor (row, column, color) {
-	var green = row * 2,
-		red = row * 2 + 1;
+	var greenRow = row * 2,
+		redRow = row * 2 + 1;
 
-	async.waterfall([
-		function (callback) {
-			// matrix.readBytes(green, 1, function (error, result) {
-			// 	if (error) {
-			// 		callback("in readBytes: " + error);
-			// 	} else {
-			// 		callback(null, result[0]);
-			// 	}
-			// });
-			var result = exec("i2cget -y 1 " + MATRIX_ADDR + " " + green.toString(16));
-			callback(null, result);
-		},
-		function (greenOutput, callback) {
-			// matrix.readBytes(red, 1, function (error, result) {
-			// 	if (error) {
-			// 		callback("in readBytes: " + error);
-			// 	} else {
-			// 		callback(null, greenOutput, result[0]);
-			// 	}
-			// });
-			var result = exec("i2cget -y 1 " + MATRIX_ADDR + " " + red.toString(16));
-			callback(null, greenOutput, result);
-		},
-		function (greenOutput, redOutput, callback) {
-			if (color === 'red') {
-				// matrix.writeBytes(red, [redOutput | (1 << column)], function (error) {
-				// 	if (error) {
-				// 		callback("in writeBytes for red: " + error);
-				// 	}
-				// });
-				exec("i2cset -y 1 " + MATRIX_ADDR + " " + red.toString(16) + " " + (redOutput | (1 << column)).toString(16));
-			} else if (color === 'green') {
-				matrix.writeBytes(green, [greenOutput | (1 << column)], function (error) {
-					if (error) {
-						callback("in writeBytes for green: " + error);
-					}
-				});
-			} else if (color === 'yellow') {
-				matrix.writeBytes(green, [greenOutput | (1 << column), redOutput | (1 << column)], function (error) {
-					if (error) {
-						callback("in writeBytes for yellow: " + error);
-					}
-				});
-			} else if (color === 'clearred') {
-				matrix.writeBytes(green, [greenOutput, 0x00], function (error) {
-					if (error) {
-						callback("in writeBytes for clearred: " + error);
-					}
-				});
-			} else if (color === 'cleargreen') {
-				matrix.writeBytes(green, [greenOutput & ~(1 << column)], function (error) {
-					if (error) {
-						callback("in writeBytes for cleargreen: " + error);
-					}
-				});
-			} else {
-				matrix.writeBytes(green, [greenOutput & ~(1 << column), redOutput & ~(1 << column)], function (error) {
-					if (error) {
-						callback("in writeBytes for off: " + error);
-					}
-				});
-			}
+	if (color === 'red') {
+		red[redRow] |= (1 << column);
+	} else if (color === 'green') {
+		green[greenRow] |= (1 << column);
+	} else if (color === 'yellow') {
+		red[redRow] |= (1 << column);
+		green[greenRow] |= (1 << column);
+	} else if (color === 'clearred') {
+		red[redRow] &= ~(1 << column);
+	} else if (color === 'cleargreen') {
+		green[greenRow] &= ~(1 << column);
+	} else {
+		red[redRow] &= ~(1 << column);
+		green[greenRow] &= ~(1 << column);
+	}
 
-			callback(null);
-		}
-	], function (error, result) {
-		if (error) {
-			console.log("Error with waterfall: " + error);
-		}
-	});
+	console.log(greenRow + " " + redRow + " " + green[greenRow] + " " + red[redRow]);
+	exec("i2cset -y 1 " + MATRIX_ADDR + " " + greenRow.toString(16) + " " + green[greenRow].toString(16));
+	exec("i2cset -y 1 " + MATRIX_ADDR + " " + redRow.toString(16) + " " + red[redRow].toString(16));
 }
 
 function setupButtons () {
