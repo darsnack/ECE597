@@ -3,13 +3,13 @@
         i2cNum  = "0x70",
 	green = [];
     red = [];
-    counter = [];
+    counter = new Array(8);
 
 // Create a matrix of LEDs inside the <table> tags.
 var matrixData;
-for(var j=7; j>=0; j--) {
+for(var i = 7; i >= 0; i--) {
 	matrixData += '<tr>';
-	for(var i=0; i<8; i++) {
+	for(var j = 7; j >= 0; j--) {
 	    matrixData += '<td><div class="LED" id="id'+i+'_'+j+
 		'" onclick="LEDclick('+i+','+j+')">'+
 		i+','+j+'</div></td>';
@@ -38,7 +38,8 @@ function LEDclick(i, j) {
     } else if (counter[i][j] === 2) {
         green[i] &= ~(1 << j);
         red[i] &= ~(1 << j);
-        $('#id'+i+'_'+j).addClass('off');
+        $('#id'+i+'_'+j).removeClass('red');
+        $('#id'+i+'_'+j).removeClass('green');
         counter[i][j] = 0;
     }
 
@@ -88,7 +89,7 @@ function disconnect() {
 
 function setupCounter () {
     for (var i = 0; i < counter.length; i++) {
-        counter[i] = new Array();
+        counter[i] = new Array(8);
     }
 }
 
