@@ -32,5 +32,5 @@
 #define LED0 (1 << 2) // GPIO_2
 #define LED1 (1 << 3) // GPIO_3
 #define SW0 (1 << 30) // GPIO_30
-#define SW1 (1 << 31) // GPIO_31
+#define SW1 (1 << 28) // GPIO_60
 #endif

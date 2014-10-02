@@ -17,28 +17,32 @@
 
 int main(int argc, char const *argv[]) {
 
-	volatile void *gpio_addr;
-	volatile unsigned int *gpio_datain;
-	volatile unsigned int *gpio_setdataout_addr;
-	volatile unsigned int *gpio_cleardataout_addr;
+	volatile void *gpio0_addr;
+	volatile void *gpio1_addr;
+	volatile unsigned int *gpio0_datain;
+	volatile unsigned int *gpio1_datain;
+	volatile unsigned int *gpio0_setdataout_addr;
+	volatile unsigned int *gpio0_cleardataout_addr;
 	int fd = open("/dev/mem", O_RDWR);
-	gpio_addr = mmap(0, GPIO0_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, GPIO0_START_ADDR);
+	gpio0_addr = mmap(0, GPIO0_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, GPIO0_START_ADDR);
+	gpio1_addr = mmap(0, GPIO1_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, GPIO0_START_ADDR);
 
-	gpio_datain = gpio_addr + GPIO_DATAIN;
-	gpio_setdataout_addr = gpio_addr + GPIO_SETDATAOUT;
-	gpio_cleardataout_addr = gpio_addr + GPIO_CLEARDATAOUT;
+	gpio0_datain = gpio0_addr + GPIO_DATAIN;
+	gpio1_datain = gpio1_addr + GPIO_DATAIN;
+	gpio0_setdataout_addr = gpio0_addr + GPIO_SETDATAOUT;
+	gpio0_cleardataout_addr = gpio0_addr + GPIO_CLEARDATAOUT;
 
-	*gpio_cleardataout_addr = LED0 | LED1;
+	*gpio0_cleardataout_addr = LED0 | LED1;
 
 	while(1) {
-		if (*gpio_datain & SW0)
-			*gpio_setdataout_addr = LED0;
-		else if (*gpio_datain & SW1)
-			*gpio_setdataout_addr = LED1;
-		else if (*gpio_datain & (SW0 | SW1))
-			*gpio_setdataout_addr = LED0 | LED1;
+		if (*gpio0_datain & SW0)
+			*gpio0_setdataout_addr = LED0;
+		else if (*gpio1_datain & SW1)
+			*gpio0_setdataout_addr = LED1;
+		else if ((*gpio0_datain & SW0) | (*gpio1_datain & SW1))
+			*gpio0_setdataout_addr = LED0 | LED1;
 		else
-			*gpio_cleardataout_addr = LED0 | LED1;
+			*gpio0_cleardataout_addr = LED0 | LED1;
 	}
 
 	return 0;
