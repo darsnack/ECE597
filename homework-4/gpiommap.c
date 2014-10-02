@@ -45,6 +45,10 @@ int main(int argc, char const *argv[]) {
 			*gpio0_cleardataout_addr = LED0 | LED1;
 	}
 
+	munmap((void *)gpio0_addr, GPIO0_SIZE);
+	munmap((void *)gpio1_addr, GPIO1_SIZE);
+    close(fd);
+
 	return 0;
 
 }
