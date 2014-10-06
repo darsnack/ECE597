@@ -49,12 +49,14 @@
 # ------ includes -------
 # -----------------------
 
-
+-include ./path.mak
 
 # --------------------------------
 # ------ user-defined vars -------
 # --------------------------------
-
+CC := $(LINUXarm_GCC)
+CFLAGS=-g
+LDFLAGS=-lstdc++
 
 
 # -----------------------
@@ -67,7 +69,9 @@
 # However, in the final Beagle makefile, you'll see more
 # targets listed. 
 
+.PHONY: all
 
+all: app.arm
 
 
 
@@ -75,15 +79,16 @@
 # ------ executable rule (.x) -------
 # -----------------------------------
 
-
+app.arm: app.o
+	$(CC) $(LDFLAGS) $^ -o $@
 
 
 # ---------------------------------------------------
 # ------ intermeditate object files rule (.o) -------
 # ---------------------------------------------------
 
-
-
+app.o: app.c
+	$(CC) $(CFLAGS) -c $< -o $@
 
 # ----------------------
 # ----- clean all ------
@@ -93,7 +98,9 @@
 # the makefile (e.g. the executables and intermediate
 # files).
 
-	
+.PHONY: clean
+clean:
+	rm -f *.o *.arm
 
 
 # -------------------------------------
