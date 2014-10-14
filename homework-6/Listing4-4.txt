@@ -66,5 +66,4 @@ CONFIG_MUSB_PIO_ONLY=y
 
 ============================================
 
-The files are similar, but there is a lot more detail to a real .config file.
-The kernel modules in the textbook listing are in the Beaglebone listing. However, the Beaglebone has to support several USB devices, each with their own driver.
+The files are similar, but there is a lot more detail to a real .config file. The kernel modules in the textbook listing are in the Beaglebone listing. However, the Beaglebone has to support several USB devices, each with their own driver.

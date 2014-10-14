@@ -1,0 +1,278 @@
+LISTING4-8.txt
+
+source “init/Kconfig”
+menu “System Type”
+choice
+	prompt “ARM system type”
+	default ARCH_RPC
+config ARCH_CLPS7500
+	bool “Cirrus-CL-PS7500FE”
+config ARCH_CLPS711X
+	bool “CLPS711x/EP721x-based”
+...
+source “arch/arm/mach-ixp4xx/Kconfig”
+ 
+=====================================================================
+
+source "init/Kconfig"
+
+source "kernel/Kconfig.freezer"
+
+menu "System Type"
+
+config MMU
+        bool "MMU-based Paged Memory Management Support"
+        default y
+        help
+          Select if you want MMU-based virtualised addressing space
+          support by paged memory management. If unsure, say 'Y'.
+
+#
+# The "ARM system type" choice list is ordered alphabetically by option
+# text.  Please add new entries in the option alphabetic order.
+#
+choice
+        prompt "ARM system type"
+        default ARCH_MULTIPLATFORM
+
+config ARCH_MULTIPLATFORM
+        bool "Allow multiple platforms to be selected"
+        depends on MMU
+        select ARM_PATCH_PHYS_VIRT
+        select AUTO_ZRELADDR
+        select COMMON_CLK
+        select MULTI_IRQ_HANDLER
+        select SPARSE_IRQ
+        select USE_OF
+
+config ARCH_INTEGRATOR
+        bool "ARM Ltd. Integrator family"
+        select ARCH_HAS_CPUFREQ
+        select ARM_AMBA
+        select COMMON_CLK
+        select COMMON_CLK_VERSATILE
+        select GENERIC_CLOCKEVENTS
+        select HAVE_TCM
+        select ICST
+        select MULTI_IRQ_HANDLER
+        select NEED_MACH_MEMORY_H
+        select PLAT_VERSATILE
+        select SPARSE_IRQ
+        select VERSATILE_FPGA_IRQ
+        help
+          Support for ARM's Integrator platform.
+
+config ARCH_REALVIEW
+        bool "ARM Ltd. RealView family"
+        select ARCH_WANT_OPTIONAL_GPIOLIB
+        select ARM_AMBA
+        select ARM_TIMER_SP804
+        select COMMON_CLK
+        select COMMON_CLK_VERSATILE
+        select GENERIC_CLOCKEVENTS
+        select GPIO_PL061 if GPIOLIB
+        select ICST
+        select NEED_MACH_MEMORY_H
+        select PLAT_VERSATILE
+        select PLAT_VERSATILE_CLCD
+        help
+          This enables support for ARM Ltd RealView boards.
+
+config ARCH_VERSATILE
+        bool "ARM Ltd. Versatile family"
+        select ARCH_WANT_OPTIONAL_GPIOLIB
+        select ARM_AMBA
+        select ARM_TIMER_SP804
+        select ARM_VIC
+        select CLKDEV_LOOKUP
+        select GENERIC_CLOCKEVENTS
+        select HAVE_MACH_CLKDEV
+        select ICST
+        select PLAT_VERSATILE
+        select PLAT_VERSATILE_CLCD
+        select PLAT_VERSATILE_CLOCK
+        select VERSATILE_FPGA_IRQ
+        help
+          This enables support for ARM Ltd Versatile board.
+
+config ARCH_AT91
+        bool "Atmel AT91"
+        select ARCH_REQUIRE_GPIOLIB
+        select CLKDEV_LOOKUP
+        select HAVE_CLK
+        select IRQ_DOMAIN
+        select NEED_MACH_GPIO_H
+        select NEED_MACH_IO_H if PCCARD
+        select PINCTRL
+        select PINCTRL_AT91 if USE_OF
+        help
+          This enables support for systems based on Atmel
+          AT91RM9200 and AT91SAM9* processors.
+
+config ARCH_BCM2835
+        bool "Broadcom BCM2835 family"
+        select ARCH_REQUIRE_GPIOLIB
+        select ARM_AMBA
+        select ARM_ERRATA_411920
+        select ARM_TIMER_SP804
+        select CLKDEV_LOOKUP
+        select COMMON_CLK
+        select CPU_V6
+        select GENERIC_CLOCKEVENTS
+        select GENERIC_GPIO
+        select MULTI_IRQ_HANDLER
+        select PINCTRL
+        select PINCTRL_BCM2835
+        select SPARSE_IRQ
+        select USE_OF
+        help
+          This enables support for the Broadcom BCM2835 SoC. This SoC is
+          use in the Raspberry Pi, and Roku 2 devices.
+
+config ARCH_CNS3XXX
+        bool "Cavium Networks CNS3XXX family"
+        select ARM_GIC
+        select CPU_V6K
+        select GENERIC_CLOCKEVENTS
+        select MIGHT_HAVE_CACHE_L2X0
+        select MIGHT_HAVE_PCI
+        select PCI_DOMAINS if PCI
+        help
+          Support for Cavium Networks CNS3XXX platform.
+
+config ARCH_CLPS711X
+        bool "Cirrus Logic CLPS711x/EP721x/EP731x-based"
+        select ARCH_REQUIRE_GPIOLIB
+        select AUTO_ZRELADDR
+        select ARM_PATCH_PHYS_VIRT
+        select AUTO_ZRELADDR
+        select COMMON_CLK
+        select MULTI_IRQ_HANDLER
+        select SPARSE_IRQ
+        select USE_OF
+
+config ARCH_INTEGRATOR
+        bool "ARM Ltd. Integrator family"
+        select ARCH_HAS_CPUFREQ
+        select ARM_AMBA
+        select COMMON_CLK
+        select COMMON_CLK_VERSATILE
+        select GENERIC_CLOCKEVENTS
+        select HAVE_TCM
+        select ICST
+        select MULTI_IRQ_HANDLER
+        select NEED_MACH_MEMORY_H
+        select PLAT_VERSATILE
+        select SPARSE_IRQ
+        select VERSATILE_FPGA_IRQ
+        help
+          Support for ARM's Integrator platform.
+
+config ARCH_REALVIEW
+        bool "ARM Ltd. RealView family"
+        select ARCH_WANT_OPTIONAL_GPIOLIB
+        select ARM_AMBA
+        select ARM_TIMER_SP804
+        select COMMON_CLK
+        select COMMON_CLK_VERSATILE
+        select GENERIC_CLOCKEVENTS
+        select GPIO_PL061 if GPIOLIB
+        select ICST
+        select NEED_MACH_MEMORY_H
+        select PLAT_VERSATILE
+        select PLAT_VERSATILE_CLCD
+        help
+          This enables support for ARM Ltd RealView boards.
+
+config ARCH_VERSATILE
+        bool "ARM Ltd. Versatile family"
+        select ARCH_WANT_OPTIONAL_GPIOLIB
+        select ARM_AMBA
+        select ARM_TIMER_SP804
+        select ARM_VIC
+        select CLKDEV_LOOKUP
+        select GENERIC_CLOCKEVENTS
+        select HAVE_MACH_CLKDEV
+        select ICST
+        select PLAT_VERSATILE
+        select PLAT_VERSATILE_CLCD
+        select PLAT_VERSATILE_CLOCK
+        select VERSATILE_FPGA_IRQ
+        help
+          This enables support for ARM Ltd Versatile board.
+
+config ARCH_AT91
+        bool "Atmel AT91"
+        select ARCH_REQUIRE_GPIOLIB
+        select CLKDEV_LOOKUP
+        select HAVE_CLK
+        select IRQ_DOMAIN
+        select NEED_MACH_GPIO_H
+        select NEED_MACH_IO_H if PCCARD
+        select PINCTRL
+        select PINCTRL_AT91 if USE_OF
+        help
+          This enables support for systems based on Atmel
+          AT91RM9200 and AT91SAM9* processors.
+...
+#
+# This is sorted alphabetically by mach-* pathname.  However, plat-*
+# Kconfigs may be included either alphabetically (according to the
+# plat- suffix) or along side the corresponding mach-* source.
+#
+source "arch/arm/mach-mvebu/Kconfig"
+
+source "arch/arm/mach-at91/Kconfig"
+
+source "arch/arm/mach-bcm/Kconfig"
+
+source "arch/arm/mach-clps711x/Kconfig"
+
+source "arch/arm/mach-cns3xxx/Kconfig"
+
+source "arch/arm/mach-davinci/Kconfig"
+
+source "arch/arm/mach-dove/Kconfig"
+
+source "arch/arm/mach-ep93xx/Kconfig"
+
+source "arch/arm/mach-footbridge/Kconfig"
+
+source "arch/arm/mach-gemini/Kconfig"
+
+source "arch/arm/mach-h720x/Kconfig"
+
+source "arch/arm/mach-highbank/Kconfig"
+
+source "arch/arm/mach-integrator/Kconfig"
+
+source "arch/arm/mach-iop32x/Kconfig"
+
+source "arch/arm/mach-iop33x/Kconfig"
+
+source "arch/arm/mach-iop13xx/Kconfig"
+
+source "arch/arm/mach-ixp4xx/Kconfig"
+
+source "arch/arm/mach-kirkwood/Kconfig"
+
+source "arch/arm/mach-ks8695/Kconfig"
+
+source "arch/arm/mach-msm/Kconfig"
+
+source "arch/arm/mach-mv78xx0/Kconfig"
+
+source "arch/arm/mach-imx/Kconfig"
+
+source "arch/arm/mach-mxs/Kconfig"
+
+source "arch/arm/mach-netx/Kconfig"
+
+source "arch/arm/mach-nomadik/Kconfig"
+
+source "arch/arm/plat-omap/Kconfig"
+...
+
+=====================================================================
+
+The two files are very similar, and I imagine that the text chose to leave out many platform options that are standard for space reasons. The only option that is in the real kernel Kconfig and not in the textbook is the ARCH_MULTIPLATFORM option. This allows a user to select multiple Kconfigs for building, an option that must have been missing when the authors wrote the textbook.

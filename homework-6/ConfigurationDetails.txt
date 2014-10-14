@@ -1,0 +1,5 @@
+CONFIGURATION DETAILS
+
+1. CONFIG_CPU_V7 = 1; CONFIG_CPU_V6K and CONFIG_CPU_v6 are undefined, so their value is 0. These values can be found in "KERNEL/.config". There is a lins that specifies processor type, and it reads "CONFIG_CPU_V7=y".
+
+2. Our setup is a little different than what the textbook describes, taking advantage of thumb instructions. There is a line "bne __enter_kernel" that calls a function that moves the PC (program counter) to the address where the kernel starts, and then allows the processor to proceed. This address points to main.c, which has the start_kernel() function that gets called to start the kernel. qThe file "main.c" can be found under "KERNEL/init/main.c".
