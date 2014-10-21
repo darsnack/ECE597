@@ -1,0 +1,137 @@
+LISTING 5-3
+
+=====================================================================
+
+1 Using base address 0x01000000 and length 0x001ce114
+2 Uncompressing Linux....... done, booting the kernel.
+3 Linux version 2.6.32-07500-g8bea867 (chris@brutus2) (gcc version 4.2.0
+20070126 (prerelease) (MontaVista 4.2.0-3.0.0.0702771 2007-03-10)) #12 Wed Dec 16
+23:07:01 EST 2009
+4 CPU: XScale-IXP42x Family [690541c1] revision 1 (ARMv5TE), cr=000039ff
+5 CPU: VIVT data cache, VIVT instruction cache
+6 Machine: ADI Engineering Coyote
+7 Memory policy: ECC disabled, Data cache writeback
+8 Built 1 zonelists in Zone order, mobility grouping on. Total pages: 16256
+9 Kernel command line: console=ttyS0,115200 root=/dev/nfs ip=dhcp
+10 PID hash table entries: 256 (order: -2, 1024 bytes)
+11 Dentry cache hash table entries: 8192 (order: 3, 32768 bytes)
+12 Inode-cache hash table entries: 4096 (order: 2, 16384 bytes)
+13 Memory: 64MB = 64MB total
+14 Memory: 61108KB available (3332K code, 199K data, 120K init, 0K highmem)
+15 SLUB: Genslabs=11, HWalign=32, Order=0-3, MinObjects=0, CPUs=1, Nodes=1
+16 Hierarchical RCU implementation.
+17 RCU-based detection of stalled CPUs is enabled.
+18 NR_IRQS:64
+19 Calibrating delay loop... 532.48 BogoMIPS (lpj=2662400)
+20 Mount-cache hash table entries: 512
+21 CPU: Testing write buffer coherency: ok
+22 NET: Registered protocol family 16
+23 IXP4xx: Using 16MiB expansion bus window size
+24 PCI: IXP4xx is host
+25 PCI: IXP4xx Using direct access for memory space
+26 PCI: bus0: Fast back to back transfers enabled
+27 SCSI subsystem initialized
+28 usbcore: registered new interface driver usbfs
+29 usbcore: registered new interface driver hub
+30 usbcore: registered new device driver usb
+31 NET: Registered protocol family 8
+32 NET: Registered protocol family 20
+33 NET: Registered protocol family 2
+34 IXP4xx Queue Manager initialized.
+35 NetWinder Floating Point Emulator V0.97 (double precision)
+36 JFFS2 version 2.2. (NAND) (c) 2001-2006 Red Hat, Inc.
+37 io scheduler noop registered
+38 io scheduler deadline registered
+39 io scheduler cfq registered (default)
+40 Serial: 8250/16550 driver, 2 ports, IRQ sharing disabled
+41 serial8250.0: ttyS0 at MMIO 0xc8001000 (irq = 13) is a XScale
+42 console [ttyS0] enabled
+43 Uniform Multi-Platform E-IDE driver
+44 ide-gd driver 1.18
+45 IXP4XX-Flash.0: Found 1 x16 devices at 0x0 in 16-bit bank
+46 Intel/Sharp Extended Query Table at 0x0031
+47 Intel/Sharp Extended Query Table at 0x0031
+48 Using buffer write method
+49 Searching for RedBoot partition table in IXP4XX-Flash.0 at offset 0xfe0000
+50 5 RedBoot partitions found on MTD device IXP4XX-Flash.0
+51 Creating 5 MTD partitions on “IXP4XX-Flash.0”:
+52 0x000000000000-0x000000060000 : “RedBoot”
+53 0x000000100000-0x000000260000 : “MyKernel”
+54 0x000000300000-0x000000900000 : “RootFS”
+55 0x000000fc0000-0x000000fc1000 : “RedBoot config”
+56 0x000000fe0000-0x000001000000 : “FIS directory”
+57 e100: Intel(R) PRO/100 Network Driver, 3.5.24-k2-NAPI
+58 e100: Copyright(c) 1999-2006 Intel Corporation
+59 ehci_hcd: USB 2.0 ‘Enhanced’ Host Controller (EHCI) Driver
+60 ohci_hcd: USB 1.1 ‘Open’ Host Controller (OHCI) Driver
+61 uhci_hcd: USB Universal Host Controller Interface driver
+62 Initializing USB Mass Storage driver...
+63 usbcore: registered new interface driver usb-storage
+64 USB Mass Storage support registered.
+65 IXP4xx Watchdog Timer: heartbeat 60 sec
+66 usbcore: registered new interface driver usbhid
+67 usbhid: USB HID core driver
+68 TCP cubic registered
+69 NET: Registered protocol family 17
+70 XScale DSP coprocessor detected.
+71 drivers/rtc/hctosys.c: unable to open rtc device (rtc0)
+72 e100 0000:00:0f.0: firmware: using built-in firmware e100/d101m_ucode.bin
+73 e100: eth0 NIC Link is Up 100 Mbps Full Duplex
+74 IP-Config: Complete:
+75 device=eth0, addr=192.168.0.29, mask=255.255.255.0, gw=255.255.255.255,
+76 host=coyote1, domain=, nis-domain=(none),
+77 bootserver=192.168.0.103, rootserver=192.168.0.103, rootpath=
+78 Looking up port of RPC 100003/2 on 192.168.0.103
+79 Looking up port of RPC 100005/1 on 192.168.0.103
+80 VFS: Mounted root (nfs filesystem) on device 0:11.
+81 Freeing init memory: 120K
+82 INIT: version 2.86 booting
+83 ... <some userland init messages omitted>
+84 coyote1 login:
+
+
+=====================================================================
+
+[    0.000000] Booting Linux on physical CPU 0x0
+[    0.000000] Initializing cgroup subsys cpu
+[    0.000000] Linux version 3.8.13-bone63 (root@a5-imx6q-wandboard-2gb) (gcc version 4.6.3 (Debian 4.6.3-14) ) #1 SMP Mon Aug 11 20:08:34 UTC 2014
+[    0.000000] CPU: ARMv7 Processor [413fc082] revision 2 (ARMv7), cr=50c5387d
+[    0.000000] CPU: PIPT / VIPT nonaliasing data cache, VIPT aliasing instruction cache
+[    0.000000] Machine: Generic AM33XX (Flattened Device Tree), model: TI AM335x BeagleBone
+[    0.000000] Memory policy: ECC disabled, Data cache writeback
+[    0.000000] On node 0 totalpages: 130816
+[    0.000000] free_area_init_node: node 0, pgdat c08b2600, node_mem_map c092f000
+[    0.000000]   Normal zone: 1024 pages used for memmap
+[    0.000000]   Normal zone: 0 pages reserved
+[    0.000000]   Normal zone: 129792 pages, LIFO batch:31
+[    0.000000] AM335X ES2.1 (l2cache sgx neon )
+[    0.000000] PERCPU: Embedded 9 pages/cpu @c0d3f000 s14080 r8192 d14592 u36864
+[    0.000000] pcpu-alloc: s14080 r8192 d14592 u36864 alloc=9*4096
+[    0.000000] pcpu-alloc: [0] 0 
+[    0.000000] Built 1 zonelists in Zone order, mobility grouping on.  Total pages: 129792
+[    0.000000] Kernel command line: console=ttyO0,115200n8 capemgr.disable_partno=BB-BONELT-HDMI,BB-BONELT-HDMIN root=/dev/mmcblk0p2 ro rootfstype=ext4 rootwait fixrtc quiet init=/lib/systemd/systemd
+[    0.000000] PID hash table entries: 2048 (order: 1, 8192 bytes)
+[    0.000000] Dentry cache hash table entries: 65536 (order: 6, 262144 bytes)
+[    0.000000] Inode-cache hash table entries: 32768 (order: 5, 131072 bytes)
+[    0.000000] __ex_table already sorted, skipping sort
+[    0.000000] allocated 1048576 bytes of page_cgroup
+[    0.000000] please try 'cgroup_disable=memory' option if you don't want memory cgroups
+[    0.000000] Memory: 511MB = 511MB total
+[    0.000000] Memory: 505412k/505412k available, 18876k reserved, 0K highmem
+[    0.000000] Virtual kernel memory layout:
+[    0.000000]     vector  : 0xffff0000 - 0xffff1000   (   4 kB)
+[    0.000000]     fixmap  : 0xfff00000 - 0xfffe0000   ( 896 kB)
+[    0.000000]     vmalloc : 0xe0800000 - 0xff000000   ( 488 MB)
+[    0.000000]     lowmem  : 0xc0000000 - 0xe0000000   ( 512 MB)
+[    0.000000]     pkmap   : 0xbfe00000 - 0xc0000000   (   2 MB)
+[    0.000000]     modules : 0xbf800000 - 0xbfe00000   (   6 MB)
+[    0.000000]       .text : 0xc0008000 - 0xc07ee8e0   (8091 kB)
+[    0.000000]       .init : 0xc07ef000 - 0xc082c700   ( 246 kB)
+[    0.000000]       .data : 0xc082e000 - 0xc08b55c0   ( 542 kB)
+[    0.000000]        .bss : 0xc08b55c0 - 0xc092ed80   ( 486 kB)
+...
+
+
+=====================================================================
+
+The outputs are similar. At the start, we can see the same decompressing of the kernel, the listing of the kernel version, and the listing of the CPU architecture happening. However, the Beaglebone must load many, many more kernel modules on start up, making the boot messages much longer.

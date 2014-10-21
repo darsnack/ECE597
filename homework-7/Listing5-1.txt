@@ -1,0 +1,42 @@
+LISTING 5-1
+
+=====================================================================
+
+$ make ARCH=arm CROSS_COMPILE=xscale_be- zImage
+  ... < many build steps omitted for clarity>
+  LD vmlinux
+  SYSMAP System.map
+  SYSMAP .tmp_System.map
+  OBJCOPY arch/arm/boot/Image
+  Kernel: arch/arm/boot/Image is ready
+  AS arch/arm/boot/compressed/head.o
+  GZIP arch/arm/boot/compressed/piggy.gz
+  AS arch/arm/boot/compressed/piggy.o
+  CC arch/arm/boot/compressed/misc.o
+  AS arch/arm/boot/compressed/head-xscale.o
+  AS arch/arm/boot/compressed/big-endian.o
+  LD arch/arm/boot/compressed/vmlinux
+  OBJCOPY arch/arm/boot/zImage
+  Kernel: arch/arm/boot/zImage is ready
+
+=====================================================================
+
+$ tools/rebuild.sh
+  ...
+  LZO     arch/arm/boot/compressed/piggy.lzo
+  CC      arch/arm/boot/compressed/misc.o
+  CC      arch/arm/boot/compressed/decompress.o
+  CC      arch/arm/boot/compressed/string.o
+  SHIPPED arch/arm/boot/compressed/lib1funcs.S
+  SHIPPED arch/arm/boot/compressed/ashldi3.S
+  AS      arch/arm/boot/compressed/lib1funcs.o
+  AS      arch/arm/boot/compressed/ashldi3.o
+  AS      arch/arm/boot/compressed/piggy.lzo.o
+  LD      arch/arm/boot/compressed/vmlinux
+  OBJCOPY arch/arm/boot/zImage
+  Kernel: arch/arm/boot/zImage is ready
+  ...
+
+=====================================================================
+
+For the most part, they are the same. However, the Beaglebone kernel uses different compression techniques. Additionally, it has additional files to build, since it is more complex. Still, we can see the same zImage and vmlinux build, common to all Linux builds.
