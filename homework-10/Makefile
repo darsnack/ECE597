@@ -1,0 +1,1 @@
+../../bb-kernel/KERNEL/drivers/char/examples/Makefile
