@@ -1,0 +1,18 @@
+3a4,11
+> static int debug_enable = 0;
+> module_param(debug_enable, int, 0);
+> MODULE_PARAM_DESC(debug_enable, "Enable debug mode");
+> 
+> static int other_param = 0;
+> module_param(other_param, int, 0);
+> MODULE_PARAM_DESC(other_param, "Another parameter");
+> 
+6,7c14
+<     printk(KERN_INFO "Hello Example Init\n");
+< 
+---
+>     printk(KERN_INFO "Hello Example Init. debug mode is %s\n", debug_enable ? "enabled" : "disabled");
+13c20
+<     printk(KERN_INFO "Hello Example Exit\n");
+---
+>     printk(KERN_INFO "Hello Example Exit. other_param is %s\n", other_param ? "enabled" : "disabled");
