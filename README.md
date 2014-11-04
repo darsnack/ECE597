@@ -28,3 +28,24 @@ To make gpioThru, type "make gpioThru.out". Run with ./gpioThru.out.
 To set up npm for the etch-a-sketch, type "npm install". Run with ./etch.js.
 
 To run the HTTP server, change directories into realtime. Then run ./install.sh. Finally, run ./boneServer.js.
+
+## Homework 5
+This homework illustrates making a makefile and contains the cross-compile setup script.
+
+## Homework 6
+This homework contains many text files comparing an simple, example Linux OS against the BeagleBone. In particular, this homework illustrates kernel configuration.
+
+## Homework 7
+This homework contains many text files comparing an simple, example Linux OS against the BeagleBone. In particular, this homework illustrates kernel compilation and loading.
+
+## Homework 8
+This homework has a custom Kconfig. That is all.
+
+## Homework 9
+This homework relates to exploring u-boot. Included in the repository is a file that was modified to include my name in the u-boot prompt.
+
+## Homework 10
+This homework was a guide to creating my own kernel module. While I was unsuccesful trying to load the module, I did manage to compile and generate the *.ko file. The folder contains some of the files I had to modify to make this module.
+
+## Homework 11
+This homework was an exploration in busybox, the swiss army knife of embedded Linux.
